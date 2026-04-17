@@ -413,6 +413,21 @@ Natija:
 
 Mas’ul:
 
+* kategoriyalar app
+* izohlar app (comment + like)
+* moderatsiya app
+* search/filter logikasi
+
+Natija:
+
+* kontent struktura + interaction
+
+---
+
+## MUHAMMAD (KATEGORIYA + IZOH + MODERATSIYA)
+
+Mas’ul:
+
 * CustomUser modeli
 * Profile modeli
 * authentication (login/register)
@@ -422,21 +437,6 @@ Mas’ul:
 Natija:
 
 * xavfsizlik va access control
-
----
-
-## MUHAMMAD (KATEGORIYA + IZOH + MODERATSIYA)
-
-Mas’ul:
-
-* kategoriyalar app
-* izohlar app (comment + like)
-* moderatsiya app
-* search/filter logikasi
-
-Natija:
-
-* kontent struktura + interaction
 
 ---
 
@@ -467,5 +467,3 @@ Agar noto‘g‘ri yozilsa:
 
 Bu loyiha — oddiy blog emas.
 To‘g‘ri qilsang, bu seni ishga olib kiradi.
-
-

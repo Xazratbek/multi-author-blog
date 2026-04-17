@@ -1,4 +1,8 @@
 from pathlib import Path
+import ssl
+import certifi
+import os
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,6 +11,21 @@ SECRET_KEY = 'django-insecure-5yvc2*2z3t0__alcopo#7gc+%6@u6x__ya2fvz8w+#rp6gh(v(
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "https://7d05-213-230-91-82.ngrok-free.app"
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "https://7d05-213-230-91-82.ngrok-free.app",
+    "https://*.ngrok-free.app",
+    "https://*.ngrok.io",
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,9 +43,16 @@ INSTALLED_APPS = [
     'core',
     'moderation',
     'tags',
+
+    #uchinchi tomon applar:
+    'crispy_forms',
+    'crispy_bootstrap5',
+    "corsheaders",
+    'django_ckeditor_5',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -93,9 +119,77 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = 'home'
+LOGIN_URL = 'login'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR.joinpath("media"))
 
+CKEDITOR_5_UPLOAD_FILE_VIEW_NAME = "/static/ckeditor/ckeditor/"
 
-# comment 1 test
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': ['heading', '|', 'bold', 'italic', 'link',
+                    'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
+    },
+    'extends': {
+        'blockToolbar': [
+            'paragraph', 'heading1', 'heading2', 'heading3',
+            '|', 'bulletedList', 'numberedList',
+            '|', 'blockQuote',
+        ],
+        'toolbar': ['undo', 'redo', '|', 'heading', '|', 'outdent', 'indent', '|', 'bold', 'italic', 'link',
+                    'underline', 'strikethrough', 'code', 'subscript', 'superscript', 'highlight', '|',
+                    'codeBlock', 'sourceEditing', 'insertImage', 'insertTable', '|',
+                    'bulletedList', 'numberedList', 'todoList', '|', 'blockQuote', 'imageUpload', 'mediaEmbed', '|',
+                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'removeFormat',
+                    'alignment', 'horizontalLine', 'pageBreak'],
+        'image': {
+            'toolbar': ['imageTextAlternative', '|', 'imageStyle:alignLeft',
+                        'imageStyle:alignCenter', 'imageStyle:alignRight', 'imageStyle:fullWidth', '|',
+                        'linkImage', 'imageInsert'],
+            'styles': [
+                'full',
+                'side'
+            ]
+        },
+        'mediaEmbed': {
+            'previewsInData': True,
+            'providers': [
+                'youtube', 'vimeo', 'instagram', 'twitter', 'googleMaps', 'flickr', 'dailymotion', 'spotify', 'codepen', 'soundcloud'
+            ]
+        },
+        'table': {
+            'contentToolbar': ['tableColumn', 'tableRow', 'mergeTableCells',
+                               'tableProperties', 'tableCellProperties'],
+            'tableToolbar': ['bold', 'italic']
+        },
+        'heading' : {
+            'options': [
+                { 'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph' },
+                { 'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1' },
+                { 'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2' },
+                { 'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3' }
+            ]
+        }
+    },
+    'list': {
+        'properties': {
+            'styles': 'true',
+            'startIndex': 'true',
+            'reversed': 'true',
+        }
+    }
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'xazratbek123@gmail.com'
+EMAIL_HOST_PASSWORD = 'qvqn blcp wrnq orkt'
+DEFAULT_FROM_EMAIL = 'xazratbek123@gmail.com'
+
+EMAIL_SSL_CONTEXT = ssl._create_unverified_context()
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

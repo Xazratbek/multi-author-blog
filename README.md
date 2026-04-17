@@ -2,17 +2,24 @@
 **Loyiha:** Ko‘p muallifli blog platformasi (Multi-Author / Publication Blog)
 **Arxitektura:** Django MVT (faqat backend)
 **Saqlash:** Local (`media/` papka)
-**DB:** PostgreSQL (lekin boshlanishida SQLite ham mumkin)
+**DB:** PostgreSQL (boshlanishda SQLite mumkin)
 
 ---
 
 # 1. UMUMIY TAVSIF
 
-Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ularni tekshiradi va faqat tasdiqlangan maqolalar (published) saytga chiqadi.
+Bu tizimda bir nechta mualliflar maqola yozadi.
+Maqola faqat **ADMIN tekshirganidan keyin** saytga chiqadi.
+
+👉 Workflow qat’iy:
+
+* MUALLIF yozadi
+* ADMIN tekshiradi
+* ADMIN tasdiqlasa → PUBLISHED bo‘ladi
 
 ---
 
-# 2. APPLAR TUZILMASI (O‘ZBEKCHA)
+# 2. APPLAR TUZILMASI
 
 ```text
 - foydalanuvchilar
@@ -34,10 +41,14 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 * id
 * username (unique, index)
 * email (unique, index)
-* rol (ADMIN, MUHARRIR, MUALLIF) (index)
+* rol (ADMIN, MUALLIF) (index)
 * is_active
 * is_staff
 * date_joined
+
+👉 MUHIM: Editor YO‘Q
+
+---
 
 ### Profil
 
@@ -57,11 +68,11 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 
 ## Viewlar (CBV)
 
-* RegisterView (CreateView)
+* RegisterView
 * LoginView
 * LogoutView
-* ProfileDetailView (DetailView)
-* ProfileUpdateView (UpdateView)
+* ProfileDetailView
+* ProfileUpdateView
 
 ---
 
@@ -77,7 +88,7 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 
 ---
 
-# 4. MAQOLALAR APP (ASOSIY LOGIKA)
+# 4. MAQOLALAR APP (CORE)
 
 ## Modellar
 
@@ -88,11 +99,20 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 * slug (unique, index)
 * content
 * author (FK → user, index)
-* status (DRAFT, TEKSHIRUVDA, NASHR, ARXIV) (index)
+* status (DRAFT, TEKSHIRUVDA, PUBLISHED, ARXIV) (index)
 * published_at (index)
 * created_at
 * updated_at
 * view_count
+
+👉 STATUS LOGIC:
+
+* DRAFT → TEKSHIRUVDA (muallif yuboradi)
+* TEKSHIRUVDA → PUBLISHED (faqat ADMIN)
+* TEKSHIRUVDA → DRAFT (ADMIN rad etsa)
+* PUBLISHED → ARXIV (system/ADMIN)
+
+---
 
 ### MaqolaTahriri (PostRevision)
 
@@ -112,22 +132,27 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 
 ## Viewlar (CBV)
 
-### Muallif uchun:
+### MUALLIF
 
 * PostCreateView
 * PostUpdateView
-* PostListView (faqat o‘z maqolalari)
+* PostListView (o‘z maqolalari)
 * PostDetailView
+* PostSubmitForReviewView (DRAFT → TEKSHIRUVDA)
 
-### Muharrir uchun:
+---
 
-* TekshiruvListView (status=TEKSHIRUVDA)
-* PostTasdiqlashView
-* PostRadEtishView
+### ADMIN
 
-### Public:
+* ReviewListView (TEKSHIRUVDA status)
+* PostPublishView (TEKSHIRUVDA → PUBLISHED)
+* PostRejectView (TEKSHIRUVDA → DRAFT)
 
-* PublishedPostListView
+---
+
+### PUBLIC
+
+* PublishedPostListView (faqat PUBLISHED)
 * PublishedPostDetailView
 
 ---
@@ -140,8 +165,9 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 /posts/create/
 /posts/<slug>/edit/
 /posts/my/
+/posts/submit/<slug>/
 /posts/review/
-/posts/<slug>/approve/
+/posts/<slug>/publish/
 /posts/<slug>/reject/
 ```
 
@@ -154,14 +180,14 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 ### Kategoriya
 
 * id
-* name (unique)
-* slug (unique, index)
+* name
+* slug
 
-### Teg (Tag)
+### Teg
 
 * id
-* name (unique)
-* slug (unique, index)
+* name
+* slug
 
 ### PostKategoriya
 
@@ -200,24 +226,18 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 ### Izoh
 
 * id
-* post (FK, index)
+* post (FK)
 * user (FK)
 * content
-* parent (self FK, nullable)
-* is_approved (bool)
+* parent (self FK)
+* is_approved
 * created_at
 
 ### Like
 
-* user (FK)
-* post (FK)
-* unique (user, post)
-
----
-
-## Formalar
-
-* IzohFormasi
+* user
+* post
+* unique(user, post)
 
 ---
 
@@ -246,7 +266,7 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 ### ModeratsiyaLog
 
 * post
-* action (TASDIQLANDI, RAD_ETILDI)
+* action (PUBLISHED, REJECTED)
 * performed_by
 * note
 * created_at
@@ -278,82 +298,73 @@ Bu tizimda bir nechta mualliflar (author) maqola yozadi, muharrirlar (editor) ul
 
 # 8. ASOSIY APP
 
-## Vazifasi
+## Vazifa
 
 * umumiy mixinlar
-* helperlar
 * base model
+* helperlar
 
 ---
 
-## Componentlar
-
-### BaseModel
+## BaseModel
 
 * created_at
 * updated_at
 
-### Mixinlar
+---
+
+## Mixinlar
 
 * RoleRequiredMixin
-* AuthorRequiredMixin
-* EditorRequiredMixin
+* AuthorQuerysetMixin
 
 ---
 
-# 9. RUXSATLAR (PERMISSIONS)
+# 9. RUXSATLAR
 
 ### ADMIN
 
 * hamma narsaga ruxsat
-
-### MUHARRIR
-
-* maqolani tasdiqlash/rad etish
-* kategoriyalarni boshqarish
+* maqolani publish/reject qiladi
 
 ### MUALLIF
 
-* faqat o‘z maqolalari bilan ishlaydi
+* maqola yozadi
+* reviewga yuboradi
+* faqat o‘z postlari
 
 ---
 
-# 10. MAQOLA HOLATLARI (WORKFLOW)
+# 10. WORKFLOW (ENG MUHIM QISM)
 
 ```text
 MUALLIF:
 DRAFT → TEKSHIRUVDA
 
-MUHARRIR:
-TEKSHIRUVDA → NASHR
+ADMIN:
+TEKSHIRUVDA → PUBLISHED
 TEKSHIRUVDA → DRAFT
 
 SYSTEM:
-NASHR → ARXIV
+PUBLISHED → ARXIV
 ```
 
 ---
 
 # 11. QIDIRUV
 
-* title bo‘yicha search (icontains)
-* kategoriya bo‘yicha filter
-* teg bo‘yicha filter
-* muallif bo‘yicha filter
+* title (icontains)
+* category filter
+* tag filter
+* author filter
 
 ---
 
-# 12. CONCURRENCY (MUHIM)
+# 12. CONCURRENCY
 
-Muammo:
-
-* 2 ta user bir vaqtni o‘zida edit qilsa data yo‘qoladi
-
-Yechim:
-
-* PostRevision saqlash
-* updated_at orqali tekshirish
-* oxirgi tahrir validation
+* PostRevision saqlanadi
+* updated_at check
+* overwrite protection
 
 ---
 
@@ -368,75 +379,60 @@ Yechim:
 
 ---
 
-## Optimizatsiya
+## Optimisation
 
 * select_related(author)
-* prefetch_related(tags, kategoriyalar)
+* prefetch_related(tags, categories)
 
 ---
 
 # 14. PAGINATION
 
-* har bir list view paginated (10–20)
+* har bir list view: 10–20 item
 
 ---
 
 # 15. MEDIA
 
-* fayllar `media/` papkada saqlanadi
-* upload_to:
-
-  * users/
-  * posts/
+* media/users/
+* media/posts/
 
 ---
 
-# 16. JAMOAVIY TAQSIMOT (3 DEVELOPER)
+# 16. JAMOAVIY TAQSIMOT
 
-## XAZRATBEK (CORE + ARCHITECTURE + MAQOLALAR)
+## XAZRATBEK (CORE + MAQOLALAR)
 
-Mas’ul:
+* maqolalar app
+* Post modeli
+* workflow logic
+* review system
+* post views
 
-* asosiy app (mixinlar, base model)
-* maqolalar app (Post, PostRevision)
-* barcha maqola viewlari (CBV)
-* workflow (DRAFT → NASHR)
-* concurrency logic
-
-Natija:
-
-* butun loyiha yuragi (core logic)
+👉 loyihaning yuragi
 
 ---
 
-## XOJIAKBAR (FOYDALANUVCHILAR + RUXSATLAR)
+## XOJIAKBAR (KATEGORIYA + IZOH + MODERATSIYA)
 
-Mas’ul:
+* categories app
+* comments app
+* likes
+* moderation system
 
-* kategoriyalar app
-* izohlar app (comment + like)
-* moderatsiya app
-* search/filter logikasi
-
-Natija:
-
-* kontent struktura + interaction
+👉 interaction layer
 
 ---
 
-## MUHAMMAD (KATEGORIYA + IZOH + MODERATSIYA)
+## MUHAMMAD (FOYDALANUVCHI + RUXSAT)
 
-Mas’ul:
+* CustomUser
+* Profile
+* login/register
+* permissions (ADMIN / MUALLIF)
+* auth system
 
-* CustomUser modeli
-* Profile modeli
-* authentication (login/register)
-* permission system (role-based)
-* barcha user viewlari
-
-Natija:
-
-* xavfsizlik va access control
+👉 security layer
 
 ---
 
@@ -444,26 +440,24 @@ Natija:
 
 Majburiy:
 
-* user system (role bilan)
-* maqola yaratish/tahrirlash
-* review system
-* kategoriya/teg
-* izohlar
+* user system
+* post CRUD
+* submit for review
+* admin publish/reject
+* categories/tags
+* comments
 * basic search
 
 ---
 
 # FINAL
 
-Agar shu TZ asosida yozilsa:
+Bu loyiha:
 
-* real productionga yaqin tizim chiqadi
+* editor yo‘q
+* faqat ADMIN control
+* simple workflow
+* lekin real production architecture
 
-Agar noto‘g‘ri yozilsa:
-
-* scalability yo‘q
-* permission buziladi
-* concurrency muammo beradi
-
-Bu loyiha — oddiy blog emas.
-To‘g‘ri qilsang, bu seni ishga olib kiradi.
+👉 To‘g‘ri qilinsa: portfolio darajasi yuqori bo‘ladi
+👉 Noto‘g‘ri qilinsa: oddiy CRUD blog bo‘lib qoladi

@@ -63,6 +63,20 @@
     </div>
 </a>
 
+<a href="{% url 'communities' %}" class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'communities' or request.resolver_match.url_name == 'community_detail' or request.resolver_match.url_name == 'community_create' %}bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-primary/20{% else %}text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground{% endif %}">
+    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'communities' or request.resolver_match.url_name == 'community_detail' or request.resolver_match.url_name == 'community_create' %}bg-white/10{% else %}bg-background/65{% endif %}">
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <path d="M20 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
+        </svg>
+    </span>
+    <div {% if not mobile %}x-show="sidebarOpen" x-transition.opacity{% endif %}>
+        <p>Hamjamiyatlar</p>
+        <p class="text-xs opacity-70">Guruhlar va chat</p>
+    </div>
+</a>
+
 {% if request.user.is_authenticated and request.user.is_superuser %}
     <a href="{% url 'article_review' %}" class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'article_review' %}bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-primary/20{% else %}text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground{% endif %}">
         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'article_review' %}bg-white/10{% else %}bg-background/65{% endif %}">

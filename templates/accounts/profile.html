@@ -20,6 +20,41 @@
             </div>
         </div>
 
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
+                <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Followers</p>
+                <p id="followers-count" class="mt-2 text-2xl font-bold">{{ profile.user.followers.count }}</p>
+            </div>
+            <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
+                <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Following</p>
+                <p class="mt-2 text-2xl font-bold">{{ profile.user.followings.count }}</p>
+            </div>
+        </div>
+
+        {% if request.user.is_authenticated and request.user != profile.user %}
+            <div class="mt-6">
+                {% if is_following_author %}
+                    <form action="{% url 'unfollow' profile.user.username %}" method="post" class="js-follow-form" data-count-target="#followers-count">
+                        {% csrf_token %}
+                        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Obunani bekor qilish">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M5 12h14"></path>
+                            </svg>
+                        </button>
+                    </form>
+                {% else %}
+                    <form action="{% url 'follow_to_author' profile.user.username %}" method="post" class="js-follow-form" data-count-target="#followers-count">
+                        {% csrf_token %}
+                        <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Obuna bo'lish">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M12 5v14M5 12h14"></path>
+                            </svg>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+
         <div class="mt-6 grid gap-3">
             {% if profile.telegram_url %}<a href="{{ profile.telegram_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Telegram</a>{% endif %}
             {% if profile.instagram_url %}<a href="{{ profile.instagram_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Instagram</a>{% endif %}

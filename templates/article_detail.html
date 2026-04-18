@@ -4,7 +4,7 @@
 {% block page_heading %}Maqola{% endblock %}
 
 {% block content %}
-<section class="grid gap-6 xl:grid-cols-[1.1fr_0.55fr]">
+<section class="mx-auto w-full max-w-5xl space-y-6">
     <article class="space-y-6">
         <c-card class="overflow-hidden border-border/70 bg-card/90 shadow-xl shadow-black/5">
             <div class="space-y-6 p-6 md:p-8">
@@ -16,71 +16,76 @@
                     {% endfor %}
                 </div>
 
-                <div>
+                <div class="space-y-3">
                     <h2 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">{{ article.title }}</h2>
-                </div>
-
-                <div class="grid gap-4 rounded-3xl border border-border/70 bg-background/70 p-5 sm:grid-cols-3">
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Muallif</p>
-                        <p class="mt-2 font-semibold">{{ article.author.username }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sana</p>
-                        <p class="mt-2 font-semibold">{{ article.published_at|default:article.created_at|date:"d M Y" }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Faollik</p>
-                        <p class="mt-2 font-semibold">{{ article.views.count }} ko'rish • {{ article.article_likes.count }} like</p>
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <span>{{ article.author.username }}</span>
+                        <span>{{ article.published_at|default:article.created_at|date:"d M Y" }}</span>
+                        <span>{{ article.views.count }} ko'rish</span>
+                        <span>{{ article.comments.count }} izoh</span>
                     </div>
                 </div>
 
-                <div class="prose prose-slate dark:prose-invert max-w-none prose-headings:font-display prose-a:text-primary">
+                <div class="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-border/70 bg-background/70 p-4">
+                    <div class="flex flex-wrap gap-3">
+                        {% if request.user.is_authenticated %}
+                            <form action="{% url 'like_article' article.slug %}" method="post" class="js-like-form" data-count-target="#like-count">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex h-11 items-center gap-2 rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Like bosish">
+                                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M7 11v9"></path>
+                                        <path d="M14 5.88 13 11h5.83a2 2 0 0 1 1.97 2.35l-1.03 6A2 2 0 0 1 17.8 21H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h3.76a2 2 0 0 0 1.94-1.53l.95-3.8A1.8 1.8 0 0 1 14.4 2 1.6 1.6 0 0 1 16 3.6c0 .76-.08 1.52-.24 2.28Z"></path>
+                                    </svg>
+                                    <span id="like-count">{{ article.article_likes.count }}</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                        <a href="{% url 'see_profile' article.author.username %}" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Muallif profili">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M12 14c4.5 0 8 2 8 4.5V21H4v-2.5C4 16 7.5 14 12 14z"></path>
+                                <circle cx="12" cy="8" r="4"></circle>
+                            </svg>
+                        </a>
+                        <a href="{% url 'articles' %}" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Maqolalarga qaytish">
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M15 18l-6-6 6-6"></path>
+                            </svg>
+                        </a>
+                        {% if request.user == article.author %}
+                            <a href="{% url 'article_update' article.slug %}" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Tahrirlash">
+                                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="m4 20 4.5-1 9.9-9.9a2.1 2.1 0 0 0-3-3L5.5 16 4 20Z"></path>
+                                    <path d="M13.5 7.5 16.5 10.5"></path>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span>{{ article.get_status_display }}</span>
+                        <span>{{ article.article_likes.count }} like</span>
+                    </div>
+                </div>
+
+                <div class="prose prose-slate dark:prose-invert max-w-none overflow-hidden prose-headings:font-display prose-a:text-primary">
                     {{ article.content|safe }}
                 </div>
 
-                <div class="flex flex-wrap gap-3 border-t border-border/70 pt-5">
-                    {% for tag in article.tags.all %}
-                        <span class="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">#{{ tag.name }}</span>
-                    {% endfor %}
-                </div>
+                {% if article.tags.exists %}
+                    <div class="flex flex-wrap gap-3 border-t border-border/70 pt-5">
+                        {% for tag in article.tags.all %}
+                            <span class="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">#{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
         </c-card>
-
-        <div class="grid gap-4 sm:grid-cols-2">
-            <c-card class="border-border/70 bg-card/85 p-5 shadow-lg shadow-black/5">
-                <p class="text-sm font-semibold">Like</p>
-                <p class="mt-1 text-sm text-muted-foreground">{{ article.article_likes.count }} ta like</p>
-                <form action="{% url 'like_article' article.slug %}" method="post" class="mt-4">
-                    {% csrf_token %}
-                    <c-button type="submit" class="rounded-xl">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M7 11v9"></path>
-                            <path d="M14 5.88 13 11h5.83a2 2 0 0 1 1.97 2.35l-1.03 6A2 2 0 0 1 17.8 21H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h3.76a2 2 0 0 0 1.94-1.53l.95-3.8A1.8 1.8 0 0 1 14.4 2 1.6 1.6 0 0 1 16 3.6c0 .76-.08 1.52-.24 2.28Z"></path>
-                        </svg>
-                        <span>{{ article.article_likes.count }}</span>
-                    </c-button>
-                </form>
-            </c-card>
-            <c-card class="border-border/70 bg-card/85 p-5 shadow-lg shadow-black/5">
-                <p class="text-sm font-semibold">Muallif</p>
-                <p class="mt-1 text-sm text-muted-foreground">{{ article.author.username }}</p>
-                <a href="{% url 'see_profile' article.author.username %}" class="mt-4 inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">
-                    <svg viewBox="0 0 24 24" class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
-                        <path d="M12 14c4.5 0 8 2 8 4.5V21H4v-2.5C4 16 7.5 14 12 14z"></path>
-                        <circle cx="12" cy="8" r="4"></circle>
-                    </svg>
-                    <span>Profil</span>
-                </a>
-            </c-card>
-        </div>
 
         {% if request.user == article.author and article.status == 'draft' %}
             <c-card class="border-border/70 bg-card/90 p-5 shadow-lg shadow-black/5">
                 <div class="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                        <p class="text-sm font-semibold">Maqola tekshiruvga yuborilmagan</p>
-                        <p class="mt-1 text-sm text-muted-foreground">Holat hozircha draft. Tekshiruvga yuborishingiz mumkin.</p>
+                        <p class="text-sm font-semibold">Maqola qoralama holatda</p>
+                        <p class="mt-1 text-sm text-muted-foreground">Tekshiruvga yuborsangiz status "Tekshiruvda" bo'ladi.</p>
                     </div>
                     <form action="{% url 'article_submit' article.slug %}" method="post">
                         {% csrf_token %}
@@ -91,93 +96,150 @@
             </c-card>
         {% endif %}
 
+        {% if request.user.is_authenticated and request.user != article.author %}
+            <c-card class="border-border/70 bg-card/90 p-5 shadow-lg shadow-black/5">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-semibold">Muallif</p>
+                        <p class="mt-1 text-sm text-muted-foreground">@{{ article.author.username }}</p>
+                    </div>
+                    {% if is_following_author %}
+                        <form action="{% url 'unfollow' article.author.username %}" method="post" class="js-follow-form" data-count-target="#author-followers-count">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Obunani bekor qilish">
+                                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M5 12h14"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'follow_to_author' article.author.username %}" method="post" class="js-follow-form" data-count-target="#author-followers-count">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Obuna bo'lish">
+                                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                    <path d="M12 5v14M5 12h14"></path>
+                                </svg>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </c-card>
+        {% endif %}
+
         <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5">
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <h3 class="font-display text-2xl font-bold">Izohlar</h3>
-                    <p class="mt-1 text-sm text-muted-foreground">{{ article.comments.count }} ta comment mavjud.</p>
+                    <p class="mt-1 text-sm text-muted-foreground">{{ article.comments.count }} ta izoh.</p>
                 </div>
             </div>
 
             {% if request.user.is_authenticated %}
-                <form action="{% url 'comment_create' article.slug %}" method="post" class="mt-6 space-y-4">
+                <form action="{% url 'comment_create' article.slug %}" method="post" class="js-comment-form mt-6 space-y-4">
                     {% csrf_token %}
                     <div>
                         <label for="content">Izoh</label>
                         <textarea id="content" name="content" placeholder="Fikringizni yozing..."></textarea>
                     </div>
-                    <c-button type="submit" class="rounded-xl">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <button type="submit" class="inline-flex h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Izoh yuborish">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path d="M22 2 11 13"></path>
                             <path d="m22 2-7 20-4-9-9-4Z"></path>
                         </svg>
-                        <span>Yuborish</span>
-                    </c-button>
+                    </button>
                 </form>
             {% else %}
                 <div class="mt-6 rounded-2xl border border-dashed border-border bg-background/60 px-5 py-4">
-                    <p class="text-sm text-muted-foreground">Comment yozish uchun <a href="{% url 'login' %}" class="font-semibold text-primary">login</a> qiling.</p>
+                    <p class="text-sm text-muted-foreground">Izoh yozish uchun <a href="{% url 'login' %}" class="font-semibold text-primary">login</a> qiling.</p>
                 </div>
             {% endif %}
 
             <div class="mt-8 space-y-4">
                 {% for comment in article.comments.all %}
                     {% if comment.parent_id is None %}
-                        <div class="rounded-2xl border border-border/70 bg-background/60 p-4">
+                        <div id="comment-{{ comment.id }}" class="rounded-2xl border border-border/70 bg-background/60 p-4">
                             <div class="flex items-start justify-between gap-4">
                                 <div>
                                     <p class="font-semibold">{{ comment.user.username }}</p>
                                     <p class="text-xs text-muted-foreground">{{ comment.created_at|date:"d M Y H:i" }}</p>
                                 </div>
-                                {% if request.user == comment.user %}
-                                    <form action="{% url 'comment_delete' comment.id %}" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit" class="text-xs font-semibold text-destructive">O'chirish</button>
-                                    </form>
-                                {% endif %}
+                                <div class="flex items-center gap-2">
+                                    {% if request.user.is_authenticated %}
+                                        <button type="button" data-reply-toggle="reply-{{ comment.id }}" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border transition hover:border-primary/40 hover:text-primary" aria-label="Javob yozish">
+                                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path d="m9 14-5-5 5-5"></path>
+                                                <path d="M20 19v-2a6 6 0 0 0-6-6H4"></path>
+                                            </svg>
+                                        </button>
+                                    {% endif %}
+                                    {% if request.user == comment.user %}
+                                        <form action="{% url 'comment_delete' comment.id %}" method="post" class="js-comment-delete-form">
+                                            {% csrf_token %}
+                                            <button type="submit" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-destructive/40 text-destructive transition hover:bg-destructive/10" aria-label="Izohni o'chirish">
+                                                <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M8 6V4h8v2"></path>
+                                                    <path d="m19 6-1 14H6L5 6"></path>
+                                                    <path d="M10 11v6M14 11v6"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </div>
                             <p class="mt-3 text-sm leading-7 text-muted-foreground">{{ comment.content }}</p>
+
+                            <div id="reply-{{ comment.id }}" class="hidden pt-4">
+                                <form action="{% url 'comment_create' article.slug %}" method="post" class="js-reply-form space-y-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="parent" value="{{ comment.id }}">
+                                    <textarea name="content" placeholder="Javob yozing..."></textarea>
+                                    <button type="submit" class="inline-flex h-9 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary" aria-label="Javobni yuborish">
+                                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                            <path d="M22 2 11 13"></path>
+                                            <path d="m22 2-7 20-4-9-9-4Z"></path>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+
+                            {% if comment.replies.exists %}
+                                <div class="mt-4 space-y-3 border-t border-border/60 pt-4">
+                                    {% for reply in comment.replies.all %}
+                                        <div id="comment-{{ reply.id }}" class="rounded-2xl border border-border/70 bg-card/80 p-4">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <div>
+                                                    <p class="font-semibold">{{ reply.user.username }}</p>
+                                                    <p class="text-xs text-muted-foreground">{{ reply.created_at|date:"d M Y H:i" }}</p>
+                                                </div>
+                                                {% if request.user == reply.user %}
+                                                    <form action="{% url 'comment_delete' reply.id %}" method="post" class="js-comment-delete-form">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-destructive/40 text-destructive transition hover:bg-destructive/10" aria-label="Javobni o'chirish">
+                                                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                                <path d="M3 6h18"></path>
+                                                                <path d="M8 6V4h8v2"></path>
+                                                                <path d="m19 6-1 14H6L5 6"></path>
+                                                                <path d="M10 11v6M14 11v6"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                            <p class="mt-3 text-sm leading-7 text-muted-foreground">{{ reply.content }}</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% empty %}
                     <div class="rounded-2xl border border-dashed border-border bg-background/60 px-5 py-4 text-sm text-muted-foreground">
-                        Hali commentlar yo‘q.
+                        Hali izohlar yo'q.
                     </div>
                 {% endfor %}
             </div>
         </c-card>
     </article>
-
-    <aside class="space-y-6">
-        <c-card class="border-border/70 bg-card/90 p-6 shadow-lg shadow-black/5">
-            <h3 class="font-display text-2xl font-bold">Maqola ma'lumotlari</h3>
-            <div class="mt-5 space-y-4">
-                <div class="rounded-2xl border border-border/70 bg-background/70 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Holat</p>
-                    <p class="mt-2 font-semibold">{{ article.get_status_display }}</p>
-                </div>
-                <div class="rounded-2xl border border-border/70 bg-background/70 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Yaratilgan vaqt</p>
-                    <p class="mt-2 font-semibold">{{ article.created_at|date:"d M Y H:i" }}</p>
-                </div>
-                <div class="rounded-2xl border border-border/70 bg-background/70 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Amallar</p>
-                    <div class="mt-3 space-y-2">
-                        <a href="{% url 'articles' %}" class="block rounded-xl border border-border px-3 py-2 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Maqolalarga qaytish</a>
-                        {% if request.user == article.author %}
-                            <a href="{% url 'article_update' article.slug %}" class="block rounded-xl border border-border px-3 py-2 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Tahrirlash</a>
-                        {% endif %}
-                        {% if request.user == article.author and article.status == 'draft' %}
-                            <form action="{% url 'article_submit' article.slug %}" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="next" value="{{ request.path }}">
-                                <c-button type="submit" class="w-full rounded-xl">Tekshiruvga yuborish</c-button>
-                            </form>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </c-card>
-    </aside>
 </section>
 {% endblock %}

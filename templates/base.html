@@ -25,6 +25,7 @@
 <body
     x-data="layoutState()"
     class="relative"
+    data-authenticated="{% if request.user.is_authenticated %}1{% endif %}"
 >
     <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.18),_transparent_58%)]"></div>
@@ -127,27 +128,23 @@
                                         <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
                                         <path d="M9.5 17a2.5 2.5 0 0 0 5 0"></path>
                                     </svg>
-                                    <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground">3</span>
+                                    <span id="notification-badge" class="absolute -right-1 -top-1 hidden h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground"></span>
                                 </div>
                             </c-dropdown_menu.trigger>
                             <c-dropdown_menu.content class="right-0 mt-3 w-80 rounded-2xl border-border/80 p-2 shadow-2xl">
-                                <div class="px-3 py-2">
-                                    <p class="font-display text-base font-bold">Bildirishnomalar</p>
-                                    <p class="text-xs text-muted-foreground">So'nggi faoliyat.</p>
+                                <div class="flex items-center justify-between gap-3 px-3 py-2">
+                                    <div>
+                                        <p class="font-display text-base font-bold">Bildirishnomalar</p>
+                                        <p class="text-xs text-muted-foreground">So'nggi faoliyat.</p>
+                                    </div>
+                                    {% if request.user.is_authenticated %}
+                                        <button id="mark-all-read" type="button" class="text-xs font-semibold text-primary">Hammasini o'qildi qilish</button>
+                                    {% endif %}
                                 </div>
                                 <c-dropdown_menu.separator></c-dropdown_menu.separator>
-                                <div class="space-y-1 px-1 py-2">
-                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
-                                        <p class="text-sm font-semibold">Yangi draft saqlandi</p>
-                                        <p class="mt-1 text-xs text-muted-foreground">Maqolangiz draft holatda turibdi.</p>
-                                    </div>
-                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
-                                        <p class="text-sm font-semibold">Profil yangilandi</p>
-                                        <p class="mt-1 text-xs text-muted-foreground">Avatar yoki havolalar o'zgartirilgan.</p>
-                                    </div>
-                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
-                                        <p class="text-sm font-semibold">Tungi rejim tayyor</p>
-                                        <p class="mt-1 text-xs text-muted-foreground">Ko'rish rejimini xohlagan payt almashtiring.</p>
+                                <div id="notification-list" class="space-y-1 px-1 py-2">
+                                    <div class="rounded-xl px-3 py-3 text-sm text-muted-foreground">
+                                        Bildirishnomalar yuklanmoqda...
                                     </div>
                                 </div>
                             </c-dropdown_menu.content>
@@ -212,6 +209,187 @@
                 }
             }
         }
+
+        async function postJson(url, formData = null) {
+            const csrftoken = document.cookie.split('; ').find((row) => row.startsWith('csrftoken='))?.split('=')[1] || '';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: formData,
+            });
+            return response.json();
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notification-badge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : String(count);
+                badge.classList.remove('hidden');
+                badge.classList.add('inline-flex');
+            } else {
+                badge.textContent = '';
+                badge.classList.add('hidden');
+                badge.classList.remove('inline-flex');
+            }
+        }
+
+        function notificationLink(item) {
+            return item.url || '#';
+        }
+
+        async function loadNotifications() {
+            const list = document.getElementById('notification-list');
+            if (!list || !document.body.dataset.authenticated) return;
+
+            try {
+                const response = await fetch('/notifications/list/');
+                const payload = await response.json();
+                updateNotificationBadge(payload.count || 0);
+
+                if (!payload.data || !payload.data.length) {
+                    list.innerHTML = '<div class="rounded-xl px-3 py-3 text-sm text-muted-foreground">Hozircha yangi bildirishnoma yo\'q.</div>';
+                    return;
+                }
+
+                list.innerHTML = payload.data.map((item) => `
+                    <button
+                        type="button"
+                        class="notification-item block w-full rounded-xl px-3 py-3 text-left transition hover:bg-accent/60"
+                        data-id="${item.id}"
+                        data-link="${notificationLink(item)}"
+                    >
+                        <p class="text-sm font-semibold">${escapeHtml(item.message)}</p>
+                        <p class="mt-1 text-xs text-muted-foreground">${escapeHtml(item.created_at)}</p>
+                    </button>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = '<div class="rounded-xl px-3 py-3 text-sm text-destructive">Bildirishnomalarni yuklab bo\'lmadi.</div>';
+            }
+        }
+
+        document.addEventListener('click', async (event) => {
+            const notificationButton = event.target.closest('.notification-item');
+            if (notificationButton) {
+                try {
+                    await fetch(`/notifications/read/${notificationButton.dataset.id}/`);
+                    await loadNotifications();
+                } finally {
+                    const link = notificationButton.dataset.link;
+                    if (link && link !== '#') {
+                        window.location.href = link;
+                    }
+                }
+            }
+
+            const toggleReply = event.target.closest('[data-reply-toggle]');
+            if (toggleReply) {
+                const wrapper = document.getElementById(toggleReply.dataset.replyToggle);
+                if (wrapper) wrapper.classList.toggle('hidden');
+            }
+        });
+
+        document.addEventListener('submit', async (event) => {
+            const likeForm = event.target.closest('.js-like-form');
+            if (likeForm) {
+                event.preventDefault();
+                const payload = await postJson(likeForm.action, new FormData(likeForm));
+                const countTarget = document.querySelector(likeForm.dataset.countTarget);
+                if (countTarget && typeof payload.count !== 'undefined') {
+                    countTarget.textContent = payload.count;
+                }
+                const button = likeForm.querySelector('button');
+                if (button) {
+                    button.classList.toggle('bg-primary', !!payload.liked);
+                    button.classList.toggle('text-primary-foreground', !!payload.liked);
+                }
+                return;
+            }
+
+            const commentForm = event.target.closest('.js-comment-form');
+            if (commentForm) {
+                event.preventDefault();
+                const payload = await postJson(commentForm.action, new FormData(commentForm));
+                if (payload.status === 201) {
+                    window.location.reload();
+                }
+                return;
+            }
+
+            const replyForm = event.target.closest('.js-reply-form');
+            if (replyForm) {
+                event.preventDefault();
+                const payload = await postJson(replyForm.action, new FormData(replyForm));
+                if (payload.status === 201) {
+                    window.location.reload();
+                }
+                return;
+            }
+
+            const deleteForm = event.target.closest('.js-comment-delete-form');
+            if (deleteForm) {
+                event.preventDefault();
+                const payload = await postJson(deleteForm.action, new FormData(deleteForm));
+                if (payload.status === 200) {
+                    document.getElementById(`comment-${payload.comment_id}`)?.remove();
+                }
+                return;
+            }
+
+            const followForm = event.target.closest('.js-follow-form');
+            if (followForm) {
+                event.preventDefault();
+                const payload = await postJson(followForm.action, new FormData(followForm));
+                if (payload.status === 200 || payload.status === 201) {
+                    const countTarget = document.querySelector(followForm.dataset.countTarget);
+                    if (countTarget && typeof payload.followers_count !== 'undefined') {
+                        countTarget.textContent = payload.followers_count;
+                    }
+                    window.location.reload();
+                }
+                return;
+            }
+
+            const communityForm = event.target.closest('.js-community-form');
+            if (communityForm) {
+                event.preventDefault();
+                const payload = await postJson(communityForm.action, new FormData(communityForm));
+                if (payload.status === 201 || payload.status === 204) {
+                    window.location.reload();
+                }
+                return;
+            }
+
+            const communityMessageForm = event.target.closest('.js-community-message-form');
+            if (communityMessageForm) {
+                event.preventDefault();
+                const payload = await postJson(communityMessageForm.action, new FormData(communityMessageForm));
+                if (payload.status === 201) {
+                    window.location.reload();
+                }
+            }
+        });
+
+        document.getElementById('mark-all-read')?.addEventListener('click', async () => {
+            await postJson('/notifications/mark/as/read/all/', new FormData());
+            await loadNotifications();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.body.dataset.authenticated) {
+                loadNotifications();
+                window.setInterval(loadNotifications, 120000);
+            }
+        });
     </script>
 </body>
 </html>

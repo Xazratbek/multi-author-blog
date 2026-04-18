@@ -14,7 +14,7 @@ class CommunityListView(ListView):
     paginate_by = 24
 
     def get_queryset(self):
-        return Community.objects.all().select_related('owner').prefetch_related('members')
+        return Community.objects.all().select_related('owner').prefetch_related('members').order_by('-created_at')
 
 class CommunityDetailView(DetailView):
     model = Community
@@ -26,6 +26,11 @@ class CommunityDetailView(DetailView):
     def get_queryset(self):
         return Community.objects.filter(slug=self.kwargs.get('slug')).select_related('owner').prefetch_related('members','messages')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_member'] = self.request.user.is_authenticated and self.request.user.is_member_of(self.object)
+        return context
+
 class CommunityCreateView(LoginRequiredMixin,CreateView):
     model = Community
     form_class = CommunityForm
@@ -34,6 +39,9 @@ class CommunityCreateView(LoginRequiredMixin,CreateView):
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('community_detail', kwargs={'slug': self.object.slug})
 
 class JoinCommunityView(LoginRequiredMixin, View):
     def post(self, request, slug):
@@ -45,7 +53,7 @@ class JoinCommunityView(LoginRequiredMixin, View):
             return JsonResponse({"status": 400, 'message': 'Siz xamjamiyat egasisiz'})
 
         if community.owner != request.user:
-            member, created = CommunityMembership.objects.create(user=request.user,community=community,role='member')
+            CommunityMembership.objects.create(user=request.user,community=community,role='member')
             return JsonResponse({"status": 201, 'message': "Siz muvaffaqiyatli hamjamiyatga a'zo bo'ldingiz"})
 
 
@@ -56,7 +64,7 @@ class LeaveCommunityView(LoginRequiredMixin, View):
             return JsonResponse({"status": 400, 'message': 'Siz hamjamiyat egasi sifatida hamjamiyatni tark eta olmaysiz\n O\'chirish uchun o\'chirish tugmasini bosing'})
 
         if request.user.is_member_of(community):
-            member = CommunityMembership.objects.filter(user=request.user).first()
+            member = CommunityMembership.objects.filter(user=request.user,community=community).first()
             member.delete()
             return JsonResponse({'status': 204, 'message': 'Siz hamjamiyatni tark etdingiz'})
         else:
@@ -68,8 +76,8 @@ class CommunityMessageSendView(LoginRequiredMixin,View):
         if message:
             community = get_object_or_404(Community,slug=slug)
             if request.user.is_member_of(community):
-                message = CommunityMessages.objects.create(community=community,author=request.user,content=message)
-                return JsonResponse({'status': 201,'message':'ok'})
+                message = CommunityMessage.objects.create(community=community,author=request.user,content=message)
+                return JsonResponse({'status': 201,'message':'ok', 'author': request.user.username, 'content': message.content, 'created_at': message.created_at.strftime("%d %b %Y %H:%M")})
             else:
                 return JsonResponse({'status': 400,'message': 'Siz hamjamiyat a\'zosi emassiz\nXabar yozish uchun hamjamiyatga obuna bo\'ling'})
         else:

@@ -54,10 +54,9 @@ class CommunityMembership(BaseModel):
         ]
 
 
-
 class CommunityMessage(BaseModel):
     community = models.ForeignKey(Community,on_delete=models.CASCADE,related_name='messages',db_index=True)
-    author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,related_name='author_messages',db_index=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True,blank=True,related_name='author_messages',db_index=True)
     content = models.TextField(max_length=150)
 
     def __str__(self):

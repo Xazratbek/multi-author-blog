@@ -121,7 +121,7 @@
         @apply scroll-smooth;
     }
     body {
-        @apply min-h-screen bg-background text-foreground antialiased;
+        @apply min-h-screen overflow-x-hidden bg-background text-foreground antialiased;
         background-image:
             radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 28%, transparent) 0, transparent 28%),
             radial-gradient(circle at top right, color-mix(in oklab, var(--color-primary) 22%, transparent) 0, transparent 24%),
@@ -140,6 +140,11 @@
     a {
         @apply transition-colors duration-200;
     }
+    img,
+    svg,
+    iframe {
+        @apply max-w-full;
+    }
     input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
     textarea,
     select {
@@ -153,5 +158,21 @@
     }
     button {
         @apply cursor-pointer;
+    }
+    .django_ckeditor_5,
+    .ck,
+    .ck-editor,
+    .ck-editor__main,
+    .ck-content {
+        max-width: 100% !important;
+    }
+    .ck-editor {
+        width: 100% !important;
+    }
+    .ck.ck-editor__main > .ck-editor__editable {
+        min-height: 24rem;
+    }
+    .ck.ck-toolbar {
+        flex-wrap: wrap !important;
     }
 }

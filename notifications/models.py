@@ -17,6 +17,14 @@ class Notification(BaseModel):
     def __str__(self):
         return f"Notification to: {self.user.username} | Type: {self.type} | Message: {self.message[:30]}"
 
+    def send_notification(self,user,type,message,content_type,object_id):
+        try:
+            notification = self.__class__.objects.create(user=user,type=type,message=message,content_type=content_type,object_id=object_id)
+            return notification
+
+        except Exception as e:
+            return e
+
     class Meta:
         db_table = 'notifications'
         verbose_name = 'Bildirishnoma'

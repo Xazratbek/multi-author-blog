@@ -14,7 +14,7 @@ class RegisterView(CreateView):
     template_name = 'registration/signup.html'
 
     def get_success_url(self):
-        return reverse_lazy('see_profile', kwargs={'username': self.object.username})
+        return reverse_lazy('my_profile')
 
 class ProfileDetailView(DetailView):
     model = Profile
@@ -25,7 +25,17 @@ class ProfileDetailView(DetailView):
 
     def get_queryset(self):
         user = get_object_or_404(CustomUser,username=self.kwargs.get("username"))
-        return Profile.objects.filter(user=user).prefetch_related('followings',"followers")
+        Profile.objects.get_or_create(user=user, defaults={'bio': ''})
+        return Profile.objects.filter(user=user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_following_author'] = (
+            self.request.user.is_authenticated
+            and self.request.user != self.object.user
+            and AuthorFollow.objects.filter(user=self.request.user, author=self.object.user).exists()
+        )
+        return context
 
 class ProfileListView(ListView):
     model = Profile
@@ -38,7 +48,8 @@ class MyProfileDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'profile'
 
     def get_object(self, queryset=None):
-        return Profile.objects.filter(user=self.request.user).prefetch_related('followings',"followers")
+        profile, _ = Profile.objects.get_or_create(user=self.request.user, defaults={'bio': ''})
+        return profile
 
 class ProfileUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
     model = Profile
@@ -59,11 +70,13 @@ class ProfileUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
 class FollowToAuthorView(LoginRequiredMixin,View):
     def post(self, request, username):
         author = get_object_or_404(CustomUser,username=username)
+        if author == request.user:
+            return JsonResponse({"status": 400, 'message': "O'zingizga obuna bo'la olmaysiz"})
         follow, created = AuthorFollow.objects.get_or_create(user=request.user,author=author)
         if not created:
-            return JsonResponse({"status": 400,'message': 'Siz allaqachon bu muallifga obuna bo\'lgansiz'})
+            return JsonResponse({"status": 400,'message': 'Siz allaqachon bu muallifga obuna bo\'lgansiz', 'followers_count': author.followers.count()})
 
-        return JsonResponse({"status": 201,'message':'Obuna bo\'ldingiz'})
+        return JsonResponse({"status": 201,'message':'Obuna bo\'ldingiz', 'followers_count': author.followers.count()})
 
 class UnFollowView(LoginRequiredMixin, View):
     def post(self, request, username):
@@ -71,7 +84,7 @@ class UnFollowView(LoginRequiredMixin, View):
         follower = AuthorFollow.objects.filter(user=request.user,author=author).first()
         if follower and author.followers.filter(user=request.user).exists():
             follower.delete()
-            return JsonResponse({"status": 204,'message':'Obuna bekor qilindi'})
+            return JsonResponse({"status": 200,'message':'Obuna bekor qilindi', 'followers_count': author.followers.count()})
 
         return JsonResponse({"status": 400, 'messsage': "Siz bu muallifga obuna bo'lmagansiz"})
 
@@ -79,10 +92,10 @@ class MyFollowersView(LoginRequiredMixin, View):
     def get(self, request):
         author = get_object_or_404(CustomUser, username=request.user.username)
 
-        return render(request,'accounts/my_followers.html',context={"followers": author.followers.all()})
+        return render(request,'accounts/my_followers.html',context={"followers": author.followers.select_related('user'), "page_title": "Mening followerlarim"})
 
 class MyFollowingsView(LoginRequiredMixin, View):
     def get(self, request):
         user = get_object_or_404(CustomUser, username=request.user.username)
 
-        return render(request,'accounts/my_followers.html',context={"followers": user.followings.all()})
+        return render(request,'accounts/my_followers.html',context={"followers": user.followings.select_related('author'), "page_title": "Men obuna bo'lganlar", "is_followings": True})

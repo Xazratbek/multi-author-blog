@@ -20,7 +20,15 @@ class CommentCreateView(LoginRequiredMixin, View):
         comment = Comment.objects.create(article=article,user=request.user,content=content,parent=parent_comment
         )
 
-        return JsonResponse({"status": 201,"message": "Comment qoldirildi","comment_id": comment.id,"username": request.user.username}, status=201)
+        return JsonResponse({
+            "status": 201,
+            "message": "Comment qoldirildi",
+            "comment_id": comment.id,
+            "username": request.user.username,
+            "content": comment.content,
+            "parent_id": comment.parent_id,
+            "created_at": comment.created_at.strftime("%d %b %Y %H:%M"),
+        }, status=201)
 
 class CommentDeleteView(LoginRequiredMixin,UserPassesTestMixin,View):
     def test_func(self):
@@ -32,7 +40,7 @@ class CommentDeleteView(LoginRequiredMixin,UserPassesTestMixin,View):
     def post(self, request, comment_id):
         comment = get_object_or_404(Comment, pk=comment_id)
         comment.delete()
-        return JsonResponse({"status": 200,'message': "Comment o'chirildi"})
+        return JsonResponse({"status": 200,'message': "Comment o'chirildi", "comment_id": comment_id})
 
 class LikeToggleView(LoginRequiredMixin,View):
     def post(self, request,slug):
@@ -40,6 +48,6 @@ class LikeToggleView(LoginRequiredMixin,View):
         like, created = Like.objects.get_or_create(user=request.user,article=article)
         if not created:
             like.delete()
-            return JsonResponse({"status": 204,'message': 'Like o\'chirildi'})
+            return JsonResponse({"status": 200,'message': 'Like o\'chirildi', 'liked': False, 'count': article.article_likes.count()})
 
-        return JsonResponse({"status": 201,'message':'Liked'})
+        return JsonResponse({"status": 201,'message':'Liked', 'liked': True, 'count': article.article_likes.count()})

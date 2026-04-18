@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Hamjamiyatlar{% endblock %}
+{% block page_heading %}Hamjamiyatlar{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h2 class="font-display text-3xl font-bold tracking-tight">Hamjamiyatlar</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Mualliflar jamlanadigan ochiq guruhlar.</p>
+        </div>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'community_create' %}" class="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90">Yangi hamjamiyat</a>
+        {% endif %}
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {% for community in communities %}
+            <c-card class="border-border/70 bg-card/90 p-5 shadow-lg shadow-black/5">
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">{{ community.name }}</h3>
+                        <p class="mt-2 text-sm text-muted-foreground">{{ community.description|default:"Izoh yo'q."|truncatechars:120 }}</p>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>@{{ community.owner.username }}</span>
+                        <span>{{ community.members.count }} a'zo</span>
+                    </div>
+                    <a href="{% url 'community_detail' community.slug %}" class="inline-flex h-11 items-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Ochish</a>
+                </div>
+            </c-card>
+        {% empty %}
+            <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center">
+                <p class="text-sm text-muted-foreground">Hamjamiyatlar hali yaratilmagan.</p>
+            </c-card>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

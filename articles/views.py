@@ -9,6 +9,11 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.db.models import Q
+from notifications.models import Notification
+from notifications.tasks import send_new_post_notifications
+from accounts.models import CustomUser, AuthorFollow
+from categories.models import Category, Tag
+
 
 class ArticleListView(ListView):
     model = Article
@@ -20,20 +25,29 @@ class ArticleListView(ListView):
         queryset = Article.objects.filter(status='published').prefetch_related('views').order_by('-created_at')
         q = self.request.GET.get('q','')
         if q:
-            queryset =  queryset.filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(categories__name__icontains=q) | Q(tags__name__icontains=q))
+            queryset = queryset.filter(
+                Q(title__icontains=q)
+                | Q(content__icontains=q)
+                | Q(categories__name__icontains=q)
+                | Q(tags__name__icontains=q)
+                | Q(author__username__icontains=q)
+            )
+
         category = self.request.GET.get('category','')
         if category:
-            queryset = queryset.filter(categories__name=category)
+            queryset = queryset.filter(categories__slug=category)
 
         tag = self.request.GET.get('tag','')
         if tag:
-            queryset = queryset.filter(tags__name=tag)
+            queryset = queryset.filter(tags__slug=tag)
 
-        author = self.request.GET.get('author','')
-        if author:
-            queryset = queryset.filter(author=author)
+        return queryset.distinct()
 
-        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.order_by('name')
+        context['tags'] = Tag.objects.order_by('name')
+        return context
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     model = Article
@@ -62,7 +76,13 @@ class ArticleDetailView(View):
         else:
             ArticleView.objects.get_or_create(article=article, session_key=session_key)
 
-        return render(request, 'article_detail.html', {'article': article})
+        is_following_author = (
+            request.user.is_authenticated
+            and request.user != article.author
+            and AuthorFollow.objects.filter(user=request.user, author=article.author).exists()
+        )
+
+        return render(request, 'article_detail.html', {'article': article, 'is_following_author': is_following_author})
 
 class ArticleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Article
@@ -121,11 +141,11 @@ class ReviewListView(LoginRequiredMixin,UserPassesTestMixin,ListView):
     context_object_name = 'articles'
     paginate_by = 12
 
-    def get_queryset(self):
-        return Article.objects.filter(status='in_progress').prefetch_related('views')
-
     def test_func(self):
         return self.request.user.is_superuser
+
+    def get_queryset(self):
+        return Article.objects.filter(status='in_progress').prefetch_related('views')
 
 class PostPublishView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
@@ -137,6 +157,7 @@ class PostPublishView(LoginRequiredMixin, UserPassesTestMixin, View):
             article.status = 'published'
             article.published_at = timezone.now()
             article.save()
+            send_new_post_notifications.delay(slug)
             next_url = request.POST.get('next')
             if next_url:
                 return redirect(next_url)

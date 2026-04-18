@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Yangi hamjamiyat{% endblock %}
+{% block page_heading %}Yangi hamjamiyat{% endblock %}
+
+{% block content %}
+<section class="mx-auto w-full max-w-4xl">
+    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5 md:p-8">
+        <div class="mb-6">
+            <h2 class="font-display text-3xl font-bold tracking-tight">Yangi hamjamiyat</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Nom va qisqa tavsif kiriting.</p>
+        </div>
+
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="flex flex-wrap gap-3 pt-2">
+                <c-button type="submit" class="rounded-xl px-6">Saqlash</c-button>
+                <a href="{% url 'communities' %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Bekor qilish</a>
+            </div>
+        </form>
+    </c-card>
+</section>
+{% endblock %}

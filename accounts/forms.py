@@ -10,4 +10,4 @@ class CustomUserCreationForm(UserCreationForm):
 class ProfileUpdateForm(ModelForm):
     class Meta:
         model = Profile
-        fields = ['user__email','bio','age','avatar','telegram_url','instagram_url','linkedin_url','github_url']
+        fields = ['bio','age','avatar','telegram_url','instagram_url','linkedin_url','github_url']

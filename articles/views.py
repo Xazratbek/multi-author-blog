@@ -7,6 +7,7 @@ from .forms import ArticleForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
 from django.utils import timezone
+from django.db.models import Q
 
 class ArticleListView(LoginRequiredMixin,ListView):
     model = Article
@@ -15,7 +16,23 @@ class ArticleListView(LoginRequiredMixin,ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        return Article.objects.filter(status='published').prefetch_related('views')
+        queryset = Article.objects.filter(status='published').prefetch_related('views').order_by('-created_at')
+        q = self.request.GET.get('q','')
+        if q:
+            queryset =  queryset.filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(categories__name__icontains=q) | Q(tags__name__icontains=q))
+        category = self.request.GET.get('category','')
+        if category:
+            queryset = queryset.filter(categories__name=category)
+
+        tag = self.request.GET.get('tag','')
+        if tag:
+            queryset = queryset.filter(tags__name=tag)
+
+        author = self.request.GET.get('author','')
+        if author:
+            queryset = queryset.filter(author=author)
+
+        return queryset
 
 class ArticleCreateView(LoginRequiredMixin, CreateView):
     model = Article
@@ -104,11 +121,11 @@ class ReviewListView(LoginRequiredMixin,UserPassesTestMixin,ListView):
         return Article.objects.filter(status='in_progress').prefetch_related('views')
 
     def test_func(self):
-        return self.request.user == 'admin'
+        return self.request.user.is_superuser
 
 class PostPublishView(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
-        return self.request.user == 'admin'
+        return self.request.user.is_superuser
 
     def post(self, request,slug):
         article = Article.objects.filter(slug=slug).first()
@@ -122,7 +139,7 @@ class PostPublishView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 class PostRejectView(LoginRequiredMixin,UserPassesTestMixin,View):
     def test_func(self):
-        return self.request.user == 'admin'
+        return self.request.user.is_superuser
 
     def post(self, request, slug):
         article = Article.objects.filter(slug=slug).first()

@@ -1,13 +1,21 @@
 from django.contrib import admin
 from .models import Article, ArticleView
 
+class CategoryInline(admin.TabularInline):
+    model = Article.categories.through
+    extra = 1
+
+class TagInline(admin.TabularInline):
+    model = Article.tags.through
+    extra = 1
+
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
+    inlines = [CategoryInline,TagInline]
     list_display = ('title', 'author', 'status', 'published_at', 'created_at')
     list_filter = ('status', 'author', 'created_at')
     search_fields = ('title', 'author__username', 'content')
     prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         (None, {
             'fields': ('title', 'slug', 'author', 'status')
@@ -32,4 +40,4 @@ class ArticleViewAdmin(admin.ModelAdmin):
     list_display = ('article', 'user', 'session_key', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('article__title', 'user__username', 'session_key')
-    readonly_fields = ('article', 'user', 'session_key', 'created_at', 'updated_at')
+    readonly_fields = ('article', 'user', 'session_key',)

@@ -19,10 +19,8 @@ class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('created_at', 'updated_at')}),
     )
-    readonly_fields = ('created_at', 'updated_at')
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'age', 'telegram_url')
     search_fields = ('user__username', 'bio')
-    readonly_fields = ('created_at', 'updated_at')

@@ -2,6 +2,7 @@ from django.db import models
 from core.models import BaseModel
 from django.conf import settings
 from django.utils.text import slugify
+from categories.models import Category, Tag
 
 class ArticleStatusChoice(models.TextChoices):
     DRAFT = 'draft', 'Qoralama'
@@ -16,6 +17,8 @@ class Article(BaseModel):
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='articles')
     status = models.CharField(max_length=40,choices=ArticleStatusChoice.choices, default=ArticleStatusChoice.DRAFT,db_index=True)
+    categories = models.ManyToManyField(Category, related_name='posts')
+    tags = models.ManyToManyField(Tag, related_name='posts')
     published_at = models.DateTimeField(null=True,blank=True)
 
     def __str__(self):
@@ -27,7 +30,7 @@ class Article(BaseModel):
             slug = base_slug
 
             counter = 1
-            while self.objects.filter(slug=slug).exists():
+            while self.__class__.objects.filter(slug=slug).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug

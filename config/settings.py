@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'comments',
     'core',
     'moderation',
-    'tags',
 
     #uchinchi tomon applar:
     'crispy_forms',

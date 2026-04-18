@@ -1,4 +1,4 @@
-**TEXNIK TOPSHIRIQ (TZ)**
+<!-- **TEXNIK TOPSHIRIQ (TZ)**
 **Loyiha:** Ko‘p muallifli blog platformasi (Multi-Author / Publication Blog)
 **Arxitektura:** Django MVT (faqat backend)
 **Saqlash:** Local (`media/` papka)
@@ -460,4 +460,4 @@ Bu loyiha:
 * lekin real production architecture
 
 👉 To‘g‘ri qilinsa: portfolio darajasi yuqori bo‘ladi
-👉 Noto‘g‘ri qilinsa: oddiy CRUD blog bo‘lib qoladi
+👉 Noto‘g‘ri qilinsa: oddiy CRUD blog bo‘lib qoladi -->

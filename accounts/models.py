@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from core.models import BaseModel
 
 class CustomUser(AbstractUser,BaseModel):
-    username = models.CharField(max_length=150,db_index=True)
+    username = models.CharField(unique=True,max_length=150,db_index=True)
     email = models.EmailField(unique=True, db_index=True)
 
     def __str__(self):
@@ -20,9 +20,12 @@ class Profile(BaseModel):
     age = models.PositiveIntegerField(null=True,blank=True)
     avatar = models.ImageField(upload_to='users/%Y/%m/%d/',blank=True,default='users/default_user.jpg')
     telegram_url = models.URLField(null=True, blank=True)
-    linked_url = models.URLField(null=True, blank=True)
+    linkedin_url = models.URLField(null=True, blank=True)
     github_url = models.URLField(null=True, blank=True)
     instagram_url = models.URLField(null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
 
     class Meta:
         db_table = 'profiles'

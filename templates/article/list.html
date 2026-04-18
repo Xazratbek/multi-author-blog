@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Maqolalar{% endblock %}
+{% block page_heading %}Maqolalar{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h2 class="font-display text-3xl font-bold tracking-tight">So'nggi maqolalar</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Chop etilgan maqolalar ro'yxati.</p>
+        </div>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'article_create' %}" class="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90">Yangi maqola</a>
+        {% endif %}
+    </div>
+        <c-card class="border-border/70 bg-card/85 p-6 shadow-xl shadow-black/5">
+            <form method="get" class="grid gap-4 md:grid-cols-4">
+                <div class="md:col-span-2">
+                    <label for="q">Qidiruv</label>
+                    <input id="q" type="text" name="q" value="{{ request.GET.q }}" placeholder="Maqola, kategoriya yoki teg">
+                </div>
+                <div>
+                    <label for="category">Kategoriya</label>
+                    <input id="category" type="text" name="category" value="{{ request.GET.category }}" placeholder="Kategoriya nomi">
+                </div>
+                <div>
+                    <label for="tag">Teg</label>
+                    <input id="tag" type="text" name="tag" value="{{ request.GET.tag }}" placeholder="Teg nomi">
+                </div>
+                <div>
+                    <label for="author">Muallif ID</label>
+                    <input id="author" type="text" name="author" value="{{ request.GET.author }}" placeholder="Muallif identifikatori">
+                </div>
+                <div class="flex items-end gap-3 md:col-span-3">
+                    <c-button type="submit" class="rounded-xl px-6">Filtrlash</c-button>
+                    <a href="{% url 'articles' %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Tozalash</a>
+                </div>
+            </form>
+        </c-card>
+
+        <div class="grid gap-5 xl:grid-cols-2">
+            {% for article in articles %}
+                <c-card class="group overflow-hidden border-border/70 bg-card/90 p-6 shadow-lg shadow-black/5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <div class="flex flex-wrap gap-2">
+                                {% for category in article.categories.all|slice:":2" %}
+                                    <c-badge class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{{ category.name }}</c-badge>
+                                {% empty %}
+                                    <c-badge class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">Umumiy</c-badge>
+                                {% endfor %}
+                            </div>
+                            <h3 class="mt-4 font-display text-2xl font-bold leading-tight tracking-tight">
+                                <a href="{% url 'article_detail' article.slug %}" class="group-hover:text-primary">{{ article.title }}</a>
+                            </h3>
+                        </div>
+                        <div class="rounded-2xl border border-border/70 bg-background/70 px-3 py-2 text-right text-xs text-muted-foreground">
+                            <p>Holat</p>
+                            <p class="mt-1 font-semibold text-foreground">{{ article.get_status_display }}</p>
+                        </div>
+                    </div>
+
+                    <p class="mt-4 line-clamp-3 text-sm leading-7 text-muted-foreground">{{ article.content|striptags|truncatechars:180 }}</p>
+
+                    <div class="mt-5 flex flex-wrap gap-2">
+                        {% for tag in article.tags.all|slice:":3" %}
+                            <span class="rounded-full border border-border/80 px-3 py-1 text-xs text-muted-foreground">#{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-6 flex items-center justify-between gap-4 border-t border-border/70 pt-4">
+                        <div class="text-sm">
+                            <p class="font-semibold">{{ article.author.username }}</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ article.created_at|date:"d M Y" }} • {{ article.views.count }} ko'rish • {{ article.comments.count }} izoh
+                            </p>
+                        </div>
+                        <a href="{% url 'article_detail' article.slug %}" class="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                            O'qish
+                            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M5 12h14"></path>
+                                <path d="m13 5 7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </c-card>
+            {% empty %}
+                <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center">
+                    <h3 class="font-display text-2xl font-bold">Maqolalar topilmadi</h3>
+                    <p class="mt-2 text-muted-foreground">Hozircha chop etilgan maqola yo'q.</p>
+                </c-card>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <div class="flex items-center justify-between rounded-2xl border border-border/70 bg-card/80 px-5 py-4 shadow-sm">
+                <p class="text-sm text-muted-foreground">Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</p>
+                <div class="flex gap-3">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Oldingi</a>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Keyingi</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+</section>
+{% endblock %}

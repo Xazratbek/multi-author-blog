@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog Sayt{% endblock %}</title>
+    <meta name="description" content="O'zbek tilidagi blog sayti.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('blog-theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body
+    x-data="layoutState()"
+    class="relative"
+>
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-64 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.18),_transparent_58%)]"></div>
+        <div class="absolute -left-24 top-1/3 h-80 w-80 rounded-full bg-[radial-gradient(circle,_rgba(245,158,11,0.18),_transparent_62%)] blur-3xl"></div>
+        <div class="absolute right-0 top-1/2 h-96 w-96 rounded-full bg-[radial-gradient(circle,_rgba(56,189,248,0.12),_transparent_60%)] blur-3xl"></div>
+    </div>
+
+    <div class="flex min-h-screen">
+        <aside
+            class="sticky top-0 hidden h-screen shrink-0 border-r border-sidebar-border/70 bg-sidebar/80 backdrop-blur-xl lg:flex lg:flex-col"
+            :class="sidebarOpen ? 'w-72 px-5 py-6' : 'w-24 px-3 py-6'"
+        >
+            <div class="flex items-center justify-between gap-3">
+                <a href="{% url 'articles' %}" class="flex min-w-0 items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M5 5h14v14H5z"></path>
+                            <path d="M8 9h8M8 12h8M8 15h5"></path>
+                        </svg>
+                    </div>
+                    <div x-show="sidebarOpen" x-transition.opacity class="min-w-0">
+                        <p class="font-display text-lg font-bold tracking-tight">Blog Sayt</p>
+                        <p class="text-xs text-muted-foreground">Maqolalar platformasi</p>
+                    </div>
+                </a>
+                <button
+                    type="button"
+                    class="hidden rounded-xl border border-sidebar-border bg-sidebar-accent p-2 text-sidebar-foreground transition hover:bg-sidebar-primary hover:text-sidebar-primary-foreground lg:block"
+                    @click="toggleSidebar()"
+                    :aria-label="sidebarOpen ? 'Sidebarni yig\\'ish' : 'Sidebarni ochish'"
+                >
+                    <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M4 12h16"></path>
+                        <path d="M9 7l-5 5 5 5"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="mt-8 flex-1 space-y-2">
+                {% include "partials/sidebar_links.html" %}
+            </nav>
+        </aside>
+
+        <c-sheet>
+            <c-sheet.content side="left" class="w-[88vw] max-w-xs border-sidebar-border bg-sidebar px-0">
+                <div class="px-5 pb-2 pt-6">
+                    <a href="{% url 'articles' %}" class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+                            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M5 5h14v14H5z"></path>
+                                <path d="M8 9h8M8 12h8M8 15h5"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-display text-lg font-bold tracking-tight">Blog Sayt</p>
+                            <p class="text-xs text-muted-foreground">Maqolalar platformasi</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="px-3 py-3">
+                    {% include "partials/sidebar_links.html" with mobile=True %}
+                </div>
+            </c-sheet.content>
+        </c-sheet>
+
+        <div class="flex min-w-0 flex-1 flex-col">
+            <header class="sticky top-0 z-30 border-b border-border/70 bg-background/75 backdrop-blur-xl">
+                <div class="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
+                    <c-sheet.trigger class="rounded-2xl border border-border bg-card p-2.5 text-foreground shadow-sm lg:hidden">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M3 6h18M3 12h18M3 18h18"></path>
+                        </svg>
+                    </c-sheet.trigger>
+
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-primary">Blog</p>
+                        <h1 class="font-display text-xl font-bold tracking-tight sm:text-2xl">{% block page_heading %}Maqolalar{% endblock %}</h1>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="rounded-2xl border border-border bg-card p-2.5 text-foreground shadow-sm transition hover:border-primary/40 hover:text-primary"
+                        @click="toggleTheme()"
+                        aria-label="Temani almashtirish"
+                    >
+                        <svg x-show="theme === 'light'" x-cloak viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M12 3v2.5M12 18.5V21M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M3 12h2.5M18.5 12H21M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"></path>
+                            <circle cx="12" cy="12" r="4.25"></circle>
+                        </svg>
+                        <svg x-show="theme === 'dark'" x-cloak viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path>
+                        </svg>
+                    </button>
+
+                    <div class="relative">
+                        <c-dropdown_menu class="relative">
+                            <c-dropdown_menu.trigger class="rounded-2xl border border-border bg-card p-2.5 text-foreground shadow-sm transition hover:border-primary/40 hover:text-primary">
+                                <div class="relative">
+                                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                                        <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
+                                        <path d="M9.5 17a2.5 2.5 0 0 0 5 0"></path>
+                                    </svg>
+                                    <span class="absolute -right-1 -top-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-accent-foreground">3</span>
+                                </div>
+                            </c-dropdown_menu.trigger>
+                            <c-dropdown_menu.content class="right-0 mt-3 w-80 rounded-2xl border-border/80 p-2 shadow-2xl">
+                                <div class="px-3 py-2">
+                                    <p class="font-display text-base font-bold">Bildirishnomalar</p>
+                                    <p class="text-xs text-muted-foreground">So'nggi faoliyat.</p>
+                                </div>
+                                <c-dropdown_menu.separator></c-dropdown_menu.separator>
+                                <div class="space-y-1 px-1 py-2">
+                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
+                                        <p class="text-sm font-semibold">Yangi draft saqlandi</p>
+                                        <p class="mt-1 text-xs text-muted-foreground">Maqolangiz draft holatda turibdi.</p>
+                                    </div>
+                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
+                                        <p class="text-sm font-semibold">Profil yangilandi</p>
+                                        <p class="mt-1 text-xs text-muted-foreground">Avatar yoki havolalar o'zgartirilgan.</p>
+                                    </div>
+                                    <div class="rounded-xl px-3 py-3 hover:bg-accent/60">
+                                        <p class="text-sm font-semibold">Tungi rejim tayyor</p>
+                                        <p class="mt-1 text-xs text-muted-foreground">Ko'rish rejimini xohlagan payt almashtiring.</p>
+                                    </div>
+                                </div>
+                            </c-dropdown_menu.content>
+                        </c-dropdown_menu>
+                    </div>
+
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'my_profile' %}" class="group flex items-center gap-3 rounded-full border border-border bg-card py-1.5 pl-1.5 pr-3 shadow-sm transition hover:border-primary/40">
+                            {% if request.user.profile.avatar %}
+                                <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="h-10 w-10 rounded-full object-cover ring-2 ring-primary/15">
+                            {% else %}
+                                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground ring-2 ring-primary/15">
+                                    {{ request.user.username|first|upper }}
+                                </span>
+                            {% endif %}
+                            <div class="hidden text-left sm:block">
+                                <p class="text-sm font-semibold leading-none group-hover:text-primary">{{ request.user.username }}</p>
+                                <p class="mt-1 text-xs text-muted-foreground">Profilim</p>
+                            </div>
+                        </a>
+                        <form method="post" action="{% url 'logout' %}" class="hidden sm:block">
+                            {% csrf_token %}
+                            <button type="submit" class="rounded-2xl border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary/40 hover:text-primary">
+                                Chiqish
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="rounded-2xl border border-border bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:border-primary/40 hover:text-primary">
+                            Kirish
+                        </a>
+                    {% endif %}
+                </div>
+            </header>
+
+            <main class="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
+                {% if messages %}
+                    <div class="mb-6 space-y-3">
+                        {% for message in messages %}
+                            <div class="rounded-2xl border border-border bg-card px-4 py-3 text-sm shadow-sm">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function layoutState() {
+            return {
+                sidebarOpen: localStorage.getItem('blog-sidebar') !== 'collapsed',
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+                toggleSidebar() {
+                    this.sidebarOpen = !this.sidebarOpen;
+                    localStorage.setItem('blog-sidebar', this.sidebarOpen ? 'expanded' : 'collapsed');
+                },
+                toggleTheme() {
+                    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+                    document.documentElement.classList.toggle('dark', this.theme === 'dark');
+                    localStorage.setItem('blog-theme', this.theme);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

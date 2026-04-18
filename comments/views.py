@@ -24,7 +24,7 @@ class CommentCreateView(LoginRequiredMixin, View):
 
 class CommentDeleteView(LoginRequiredMixin,UserPassesTestMixin,View):
     def test_func(self):
-        comment_slug = self.kwargs.get('slug')
+        comment_slug = self.kwargs.get('comment_id')
         comment = get_object_or_404(Comment, pk=comment_slug)
 
         return comment.user == self.request.user

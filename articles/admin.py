@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Article, ArticleView
+from .forms import ArticleAdminForm
 
 class CategoryInline(admin.TabularInline):
     model = Article.categories.through
@@ -11,24 +12,17 @@ class TagInline(admin.TabularInline):
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
+    form = ArticleAdminForm
     inlines = [CategoryInline,TagInline]
     list_display = ('title', 'author', 'status', 'published_at', 'created_at')
     list_filter = ('status', 'author', 'created_at')
     search_fields = ('title', 'author__username', 'content')
     prepopulated_fields = {'slug': ('title',)}
     fieldsets = (
-        (None, {
-            'fields': ('title', 'slug', 'author', 'status')
-        }),
         ('Kontent', {
-            'fields': ('content', 'published_at')
-        }),
-        ('Tizim ma\'lumotlari', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',),
+            'fields': ('title','slug','author','content', 'published_at')
         }),
     )
-
     actions = ['make_published']
 
     @admin.action(description='Tanlangan maqolalarni chop etish')

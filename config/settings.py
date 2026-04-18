@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'categories',
     'comments',
     'core',
-    'moderation',
+    'community',
+    'notifications',
+    'django_cotton',
 
     #uchinchi tomon applar:
     'crispy_forms',
@@ -102,28 +104,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'uz'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
-LOGIN_REDIRECT_URL = "home"
-LOGOUT_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = "articles"
+LOGOUT_REDIRECT_URL = 'articles'
 LOGIN_URL = 'login'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR.joinpath("media"))
 
-CKEDITOR_5_UPLOAD_FILE_VIEW_NAME = "/static/ckeditor/ckeditor/"
+CK_EDITOR_5_UPLOAD_FILE_VIEW_NAME = "ck_editor_5_upload_file"
 
 CKEDITOR_5_CONFIGS = {
     'default': {

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Ro'yxatdan o'tish{% endblock %}
+{% block page_heading %}Ro'yxatdan o'tish{% endblock %}
+
+{% block content %}
+<section class="mx-auto w-full max-w-3xl">
+    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5 md:p-8">
+        <div class="mb-6">
+            <h2 class="font-display text-3xl font-bold tracking-tight">Yangi akkaunt yaratish</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Ro'yxatdan o'ting va maqola yozishni boshlang.</p>
+        </div>
+        <form method="post" class="grid gap-5 md:grid-cols-2">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.username.id_for_label }}">Login</label>
+                {{ form.username }}
+            </div>
+            <div>
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+            </div>
+            <div>
+                <label for="{{ form.first_name.id_for_label }}">Ism</label>
+                {{ form.first_name }}
+            </div>
+            <div>
+                <label for="{{ form.last_name.id_for_label }}">Familiya</label>
+                {{ form.last_name }}
+            </div>
+            <div>
+                <label for="{{ form.password1.id_for_label }}">Parol</label>
+                {{ form.password1 }}
+            </div>
+            <div>
+                <label for="{{ form.password2.id_for_label }}">Parolni tasdiqlang</label>
+                {{ form.password2 }}
+            </div>
+            <div class="md:col-span-2">
+                <c-button type="submit" class="w-full rounded-xl">Akkaunt yaratish</c-button>
+            </div>
+        </form>
+    </c-card>
+</section>
+{% endblock %}

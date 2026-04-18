@@ -6,10 +6,11 @@ from django.views.generic import ListView, CreateView, UpdateView
 from .forms import ArticleForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.utils import timezone
 from django.db.models import Q
 
-class ArticleListView(LoginRequiredMixin,ListView):
+class ArticleListView(ListView):
     model = Article
     template_name = 'article/list.html'
     context_object_name = 'articles'
@@ -99,14 +100,17 @@ class MyArticles(LoginRequiredMixin,ListView):
 
 class ArticleSubmitForReviewView(LoginRequiredMixin, UserPassesTestMixin,View):
     def test_func(self):
-        return
+        article = get_object_or_404(Article, slug=self.kwargs.get('slug'))
+        return article.author == self.request.user
 
     def post(self,request,slug):
         article = get_object_or_404(Article,slug=slug,author=request.user)
         if article:
             article.status = 'in_progress'
             article.save()
-
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
             return JsonResponse({"status": 201,"message": "Maqola tekshiruvga yuborildi"})
         else:
             return JsonResponse({"status": 400,'message': "Maqola topilmadi"})
@@ -133,6 +137,9 @@ class PostPublishView(LoginRequiredMixin, UserPassesTestMixin, View):
             article.status = 'published'
             article.published_at = timezone.now()
             article.save()
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
             return JsonResponse({"status": 200, 'message': 'Maqola chop etildi'})
         else:
             return JsonResponse({"status": 400,'message': 'Maqola mavjud emas'})
@@ -146,6 +153,9 @@ class PostRejectView(LoginRequiredMixin,UserPassesTestMixin,View):
         if article:
             article.status = 'draft'
             article.save()
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
             return JsonResponse({"status": 200, 'message': 'Maqola chop etilishi bekor qilindi'})
 
         else:

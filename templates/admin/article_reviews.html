@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Maqolalarni Tekshirish{% endblock %}
+{% block page_heading %}Maqolalarni tekshirish{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h2 class="font-display text-3xl font-bold tracking-tight">Tekshiruvdagi maqolalar</h2>
+        <p class="mt-2 text-sm text-muted-foreground">Tekshiruvga yuborilgan maqolalarni shu yerdan boshqarasiz.</p>
+    </div>
+
+    <div class="grid gap-5 xl:grid-cols-2">
+        {% for article in articles %}
+            <c-card class="border-border/70 bg-card/90 p-6 shadow-lg shadow-black/5">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-display text-2xl font-bold tracking-tight">{{ article.title }}</h3>
+                        <p class="mt-2 text-sm text-muted-foreground">by {{ article.author.username }} • {{ article.created_at|date:"d M Y" }}</p>
+                    </div>
+                    <c-badge class="rounded-full bg-accent px-3 py-1 text-xs text-accent-foreground">Tekshiruvda</c-badge>
+                </div>
+                <p class="mt-4 text-sm leading-7 text-muted-foreground">{{ article.content|striptags|truncatechars:180 }}</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="{% url 'article_detail' article.slug %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Ko'rish</a>
+                    <form action="{% url 'article_publish' article.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <c-button type="submit" class="rounded-xl">Submit</c-button>
+                    </form>
+                    <form action="{% url 'article_reject' article.slug %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.path }}">
+                        <c-button type="submit" variant="outline" class="rounded-xl">Reject</c-button>
+                    </form>
+                </div>
+            </c-card>
+        {% empty %}
+            <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center">
+                <h3 class="font-display text-2xl font-bold">Tekshiruv navbati bo'sh</h3>
+                <p class="mt-2 text-muted-foreground">Hozircha tekshiruvga kelgan maqolalar yo'q.</p>
+            </c-card>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

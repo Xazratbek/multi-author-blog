@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Authors{% endblock %}
+{% block page_heading %}Meet the authors{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h2 class="font-display text-3xl font-bold tracking-tight">Author Directory</h2>
+        <p class="mt-2 text-sm text-muted-foreground">Community ichidagi yozuvchilar va ularning public profillari.</p>
+    </div>
+
+    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {% for profile in profiles %}
+            <a href="{% url 'see_profile' profile.user.username %}" class="block">
+                <c-card class="h-full border-border/70 bg-card/90 p-6 shadow-lg shadow-black/5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
+                    <div class="flex items-center gap-4">
+                        {% if profile.avatar %}
+                            <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }}" class="h-16 w-16 rounded-2xl object-cover ring-2 ring-primary/15">
+                        {% else %}
+                            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground ring-2 ring-primary/15">
+                                {{ profile.user.username|first|upper }}
+                            </span>
+                        {% endif %}
+                        <div>
+                            <h3 class="font-display text-2xl font-bold tracking-tight">{{ profile.user.username }}</h3>
+                            <p class="text-sm text-muted-foreground">{{ profile.user.articles.count }} articles</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm leading-7 text-muted-foreground">{{ profile.bio|default:"No bio available."|truncatechars:110 }}</p>
+                </c-card>
+            </a>
+        {% empty %}
+            <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center md:col-span-2 xl:col-span-3">
+                <h3 class="font-display text-2xl font-bold">No profiles found</h3>
+            </c-card>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

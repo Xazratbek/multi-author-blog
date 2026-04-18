@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from core.models import BaseModel
+from django.core.exceptions import ValidationError
 
 class CustomUser(AbstractUser,BaseModel):
     username = models.CharField(unique=True,max_length=150,db_index=True)
@@ -8,6 +9,9 @@ class CustomUser(AbstractUser,BaseModel):
 
     def __str__(self):
         return self.username
+
+    def is_member_of(self, community):
+        return self.community_members.filter(community=community).exists()
 
     class Meta:
         db_table = 'users'
@@ -31,3 +35,29 @@ class Profile(BaseModel):
         db_table = 'profiles'
         verbose_name = 'Profil'
         verbose_name_plural = 'Profillar'
+
+class AuthorFollow(BaseModel):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='followings')
+    author = models.ForeignKey(CustomUser,on_delete=models.CASCADE,related_name='followers')
+
+    def __str__(self):
+        return f"Author: {self.author.username} | Followed by: {self.user.username}"
+
+    def clean(self):
+        if self.user == self.author:
+            raise ValidationError("Foydalanuvchi o'ziga o'zi obuna bo'la olmaydi")
+
+    class Meta:
+        db_table = 'authorfollows'
+        verbose_name = 'Obuna'
+        verbose_name_plural = 'Obunalar'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user','author'],
+                name='unique_user_author_followings'
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['user', 'author'],name='unique_user_author'),
+            models.Index(fields=['author', 'user'],name='unique_author_user'),
+        ]

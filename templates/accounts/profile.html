@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile.user.username }}{% endblock %}
+{% block page_heading %}Muallif profili{% endblock %}
+
+{% block content %}
+<section class="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.75fr_1.25fr]">
+    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5">
+        <div class="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ profile.user.username }}" class="h-24 w-24 rounded-3xl object-cover ring-4 ring-primary/15">
+            {% else %}
+                <span class="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary text-3xl font-bold text-primary-foreground ring-4 ring-primary/15">
+                    {{ profile.user.username|first|upper }}
+                </span>
+            {% endif %}
+            <div>
+                <h2 class="font-display text-3xl font-bold tracking-tight">{{ profile.user.username }}</h2>
+                <p class="mt-2 text-sm text-muted-foreground">{{ profile.bio|default:"Bio kiritilmagan." }}</p>
+            </div>
+        </div>
+
+        <div class="mt-6 grid gap-3">
+            {% if profile.telegram_url %}<a href="{{ profile.telegram_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Telegram</a>{% endif %}
+            {% if profile.instagram_url %}<a href="{{ profile.instagram_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Instagram</a>{% endif %}
+            {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">LinkedIn</a>{% endif %}
+            {% if profile.github_url %}<a href="{{ profile.github_url }}" class="rounded-2xl border border-border px-4 py-3 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">GitHub</a>{% endif %}
+        </div>
+    </c-card>
+
+    <div class="space-y-6">
+        <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5">
+            <div class="flex items-center justify-between">
+                <h3 class="font-display text-2xl font-bold">Maqolalari</h3>
+                <c-badge class="rounded-full bg-primary/10 px-3 py-1 text-primary">{{ profile.user.articles.count }}</c-badge>
+            </div>
+            <div class="mt-5 space-y-4">
+                {% for article in profile.user.articles.all %}
+                    <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="font-semibold">{{ article.title }}</p>
+                                <p class="mt-1 text-xs text-muted-foreground">{{ article.get_status_display }} • {{ article.created_at|date:"d M Y" }}</p>
+                            </div>
+                            <a href="{% url 'article_detail' article.slug %}" class="text-sm font-semibold text-primary">Ko'rish</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-muted-foreground">Hali maqolalar yo‘q.</p>
+                {% endfor %}
+            </div>
+        </c-card>
+    </div>
+</section>
+{% endblock %}

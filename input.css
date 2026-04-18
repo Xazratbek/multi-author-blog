@@ -1,0 +1,157 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+    --background: oklch(0.98 0.01 95);
+    --foreground: oklch(0.22 0.03 250);
+    --card: oklch(1 0.01 100);
+    --card-foreground: oklch(0.22 0.03 250);
+    --popover: oklch(1 0.01 100);
+    --popover-foreground: oklch(0.22 0.03 250);
+    --primary: oklch(0.55 0.12 205);
+    --primary-foreground: oklch(0.99 0.01 100);
+    --secondary: oklch(0.94 0.02 95);
+    --secondary-foreground: oklch(0.28 0.03 250);
+    --muted: oklch(0.95 0.01 95);
+    --muted-foreground: oklch(0.5 0.03 230);
+    --accent: oklch(0.84 0.1 88);
+    --accent-foreground: oklch(0.22 0.03 250);
+    --destructive: oklch(0.63 0.2 28);
+    --destructive-foreground: oklch(0.99 0 0);
+    --border: oklch(0.88 0.02 95);
+    --input: oklch(0.9 0.02 95);
+    --ring: oklch(0.58 0.12 205);
+    --chart-1: oklch(0.58 0.18 236);
+    --chart-2: oklch(0.78 0.13 82);
+    --chart-3: oklch(0.66 0.12 192);
+    --chart-4: oklch(0.7 0.14 34);
+    --chart-5: oklch(0.62 0.17 330);
+    --radius: 1rem;
+    --sidebar: oklch(0.93 0.02 95);
+    --sidebar-foreground: oklch(0.22 0.03 250);
+    --sidebar-primary: oklch(0.55 0.12 205);
+    --sidebar-primary-foreground: oklch(0.99 0.01 100);
+    --sidebar-accent: oklch(0.89 0.04 88);
+    --sidebar-accent-foreground: oklch(0.22 0.03 250);
+    --sidebar-border: oklch(0.84 0.02 95);
+    --sidebar-ring: oklch(0.58 0.12 205);
+}
+
+.dark {
+    --background: oklch(0.19 0.03 246);
+    --foreground: oklch(0.95 0.01 95);
+    --card: oklch(0.24 0.03 245);
+    --card-foreground: oklch(0.95 0.01 95);
+    --popover: oklch(0.23 0.03 245);
+    --popover-foreground: oklch(0.95 0.01 95);
+    --primary: oklch(0.74 0.11 195);
+    --primary-foreground: oklch(0.19 0.03 246);
+    --secondary: oklch(0.29 0.03 245);
+    --secondary-foreground: oklch(0.95 0.01 95);
+    --muted: oklch(0.27 0.02 245);
+    --muted-foreground: oklch(0.73 0.03 95);
+    --accent: oklch(0.76 0.11 83);
+    --accent-foreground: oklch(0.19 0.03 246);
+    --destructive: oklch(0.67 0.2 28);
+    --destructive-foreground: oklch(0.96 0.01 95);
+    --border: oklch(0.32 0.03 245);
+    --input: oklch(0.3 0.03 245);
+    --ring: oklch(0.74 0.11 195);
+    --chart-1: oklch(0.72 0.16 236);
+    --chart-2: oklch(0.82 0.12 82);
+    --chart-3: oklch(0.76 0.12 190);
+    --chart-4: oklch(0.73 0.13 34);
+    --chart-5: oklch(0.76 0.16 338);
+    --sidebar: oklch(0.16 0.03 246);
+    --sidebar-foreground: oklch(0.95 0.01 95);
+    --sidebar-primary: oklch(0.74 0.11 195);
+    --sidebar-primary-foreground: oklch(0.19 0.03 246);
+    --sidebar-accent: oklch(0.29 0.03 245);
+    --sidebar-accent-foreground: oklch(0.95 0.01 95);
+    --sidebar-border: oklch(0.29 0.03 245);
+    --sidebar-ring: oklch(0.74 0.11 195);
+}
+
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    html {
+        @apply scroll-smooth;
+    }
+    body {
+        @apply min-h-screen bg-background text-foreground antialiased;
+        background-image:
+            radial-gradient(circle at top left, color-mix(in oklab, var(--color-accent) 28%, transparent) 0, transparent 28%),
+            radial-gradient(circle at top right, color-mix(in oklab, var(--color-primary) 22%, transparent) 0, transparent 24%),
+            linear-gradient(135deg, color-mix(in oklab, var(--color-background) 94%, white) 0%, var(--color-background) 48%, color-mix(in oklab, var(--color-background) 84%, var(--color-primary)) 100%);
+        font-family: "Instrument Sans", sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6, .font-display {
+        font-family: "Space Grotesk", sans-serif;
+    }
+    ::selection {
+        @apply bg-primary text-primary-foreground;
+    }
+    [x-cloak] {
+        display: none !important;
+    }
+    a {
+        @apply transition-colors duration-200;
+    }
+    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+    textarea,
+    select {
+        @apply flex h-11 w-full rounded-xl border border-input bg-background/80 px-4 py-2 text-sm text-foreground shadow-xs transition outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20;
+    }
+    textarea {
+        @apply min-h-36 resize-y py-3;
+    }
+    label {
+        @apply text-sm font-medium text-foreground/90;
+    }
+    button {
+        @apply cursor-pointer;
+    }
+}

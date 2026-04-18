@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Category Articles{% endblock %}
+{% block page_heading %}Category archive{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div>
+        <h2 class="font-display text-3xl font-bold tracking-tight">Category Results</h2>
+        <p class="mt-2 text-sm text-muted-foreground">Tanlangan kategoriya uchun barcha published maqolalar.</p>
+    </div>
+
+    <div class="grid gap-5 xl:grid-cols-2">
+        {% for article in category_articles %}
+            <c-card class="border-border/70 bg-card/90 p-6 shadow-lg shadow-black/5">
+                <h3 class="font-display text-2xl font-bold tracking-tight">
+                    <a href="{% url 'article_detail' article.slug %}" class="hover:text-primary">{{ article.title }}</a>
+                </h3>
+                <p class="mt-3 text-sm leading-7 text-muted-foreground">{{ article.content|striptags|truncatechars:160 }}</p>
+                <div class="mt-5 flex items-center justify-between">
+                    <p class="text-xs text-muted-foreground">{{ article.author.username }} • {{ article.created_at|date:"d M Y" }}</p>
+                    <a href="{% url 'article_detail' article.slug %}" class="text-sm font-semibold text-primary">Read</a>
+                </div>
+            </c-card>
+        {% empty %}
+            <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center">
+                <h3 class="font-display text-2xl font-bold">No results</h3>
+            </c-card>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

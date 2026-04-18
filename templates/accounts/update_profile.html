@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Update Profile{% endblock %}
+{% block page_heading %}Refine your profile{% endblock %}
+
+{% block content %}
+<section class="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_0.38fr]">
+    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5 md:p-8">
+        <div class="mb-6">
+            <h2 class="font-display text-3xl font-bold tracking-tight">Edit Profile</h2>
+            <p class="mt-2 text-sm text-muted-foreground">Avatar, bio va social havolalarni yangilang.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.bio.id_for_label }}">Bio</label>
+                {{ form.bio }}
+            </div>
+            <div>
+                <label for="{{ form.age.id_for_label }}">Age</label>
+                {{ form.age }}
+            </div>
+            <div>
+                <label for="{{ form.avatar.id_for_label }}">Avatar</label>
+                {{ form.avatar }}
+            </div>
+            <div>
+                <label for="{{ form.telegram_url.id_for_label }}">Telegram</label>
+                {{ form.telegram_url }}
+            </div>
+            <div>
+                <label for="{{ form.instagram_url.id_for_label }}">Instagram</label>
+                {{ form.instagram_url }}
+            </div>
+            <div>
+                <label for="{{ form.linkedin_url.id_for_label }}">LinkedIn</label>
+                {{ form.linkedin_url }}
+            </div>
+            <div>
+                <label for="{{ form.github_url.id_for_label }}">GitHub</label>
+                {{ form.github_url }}
+            </div>
+            <div class="flex flex-wrap gap-3 pt-2">
+                <c-button type="submit" class="rounded-xl px-6">Save Profile</c-button>
+                <a href="{% url 'my_profile' %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Cancel</a>
+            </div>
+        </form>
+    </c-card>
+
+    <c-card class="border-border/70 bg-card/85 p-6 shadow-lg shadow-black/5">
+        <h3 class="font-display text-2xl font-bold">Profile notes</h3>
+        <p class="mt-3 text-sm leading-7 text-muted-foreground">Bio va havolalar public profile sahifasida chiqadi. Avatar esa yuqori o‘ng profil blokida ko‘rinadi.</p>
+    </c-card>
+</section>
+{% endblock %}

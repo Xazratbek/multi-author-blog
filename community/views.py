@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .forms import *
 from django.views import View
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 
 class CommunityListView(ListView):
     model = Community
@@ -28,7 +28,16 @@ class CommunityDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_member'] = self.request.user.is_authenticated and self.request.user.is_member_of(self.object)
+        if self.request.user.is_authenticated:
+            is_member = self.request.user.is_member_of(self.object)
+            is_owner = self.request.user == self.object.owner
+        else:
+            is_member = False
+            is_owner = False
+        
+        context['is_member'] = is_member
+        context['can_post_message'] = is_member or is_owner
+        context['communities'] = Community.objects.order_by('-created_at')
         return context
 
 class CommunityCreateView(LoginRequiredMixin,CreateView):
@@ -70,15 +79,34 @@ class LeaveCommunityView(LoginRequiredMixin, View):
         else:
             return JsonResponse({"status": 400,'message': 'Siz hamjamiyat a\'zosi emassiz'})
 
+
+class CommunityMessageListView(LoginRequiredMixin, View):
+    def get(self, request, slug):
+        community = get_object_or_404(Community, slug=slug)
+        if not (request.user.is_member_of(community) or community.owner == request.user):
+            return HttpResponseForbidden()
+
+        last_message_id = request.GET.get('last_message_id')
+        if last_message_id:
+            messages = community.messages.filter(id__gt=last_message_id).order_by('created_at')
+            return render(request, 'community/partials/message_list.html', {'messages': messages})
+        
+        return HttpResponse('')
+
+
 class CommunityMessageSendView(LoginRequiredMixin,View):
     def post(self, request,slug):
-        message = request.POST.get("message",'')
-        if message:
+        message_content = request.POST.get("message",'').strip()
+        if message_content:
             community = get_object_or_404(Community,slug=slug)
-            if request.user.is_member_of(community):
-                message = CommunityMessage.objects.create(community=community,author=request.user,content=message)
-                return JsonResponse({'status': 201,'message':'ok', 'author': request.user.username, 'content': message.content, 'created_at': message.created_at.strftime("%d %b %Y %H:%M")})
+            if request.user.is_member_of(community) or community.owner == request.user:
+                new_message = CommunityMessage.objects.create(
+                    community=community,
+                    author=request.user,
+                    content=message_content
+                )
+                return render(request, 'community/partials/message_list.html', {'messages': [new_message]})
             else:
-                return JsonResponse({'status': 400,'message': 'Siz hamjamiyat a\'zosi emassiz\nXabar yozish uchun hamjamiyatga obuna bo\'ling'})
+                return HttpResponseForbidden("You are not authorized to post in this community.")
         else:
-            return JsonResponse({"status":400,'message':'Bo\'sh xabar yozmang'})
+            return HttpResponse('')

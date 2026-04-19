@@ -72,7 +72,9 @@ class FollowToAuthorView(LoginRequiredMixin,View):
         author = get_object_or_404(CustomUser,username=username)
         if author == request.user:
             return JsonResponse({"status": 400, 'message': "O'zingizga obuna bo'la olmaysiz"})
-        follow, created = AuthorFollow.objects.get_or_create(user=request.user,author=author)
+        _follow, created = AuthorFollow.objects.get_or_create(
+            user=request.user, author=author
+        )
         if not created:
             return JsonResponse({"status": 400,'message': 'Siz allaqachon bu muallifga obuna bo\'lgansiz', 'followers_count': author.followers.count()})
 

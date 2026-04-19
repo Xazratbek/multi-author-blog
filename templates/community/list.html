@@ -17,19 +17,25 @@
 
     <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {% for community in communities %}
-            <c-card class="border-border/70 bg-card/90 p-5 shadow-lg shadow-black/5">
+            <a href="{% url 'community_detail' community.slug %}" class="block rounded-3xl border-border/70 bg-card/90 p-5 shadow-lg shadow-black/5 transition hover:border-primary/40">
                 <div class="space-y-4">
+                    {% if community.community_profile %}
+                        <img src="{{ community.community_profile.url }}" alt="{{ community.name }}" class="aspect-video w-full rounded-2xl object-cover">
+                    {% else %}
+                        <div class="flex aspect-video w-full items-center justify-center rounded-2xl bg-muted text-3xl font-bold text-muted-foreground">
+                            {{ community.name|first }}
+                        </div>
+                    {% endif %}
                     <div>
                         <h3 class="font-display text-2xl font-bold">{{ community.name }}</h3>
                         <p class="mt-2 text-sm text-muted-foreground">{{ community.description|default:"Izoh yo'q."|truncatechars:120 }}</p>
                     </div>
-                    <div class="flex items-center justify-between text-sm text-muted-foreground">
+                    <div class="flex items-center justify-between border-t border-border/70 pt-4 text-sm text-muted-foreground">
                         <span>@{{ community.owner.username }}</span>
                         <span>{{ community.members.count }} a'zo</span>
                     </div>
-                    <a href="{% url 'community_detail' community.slug %}" class="inline-flex h-11 items-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Ochish</a>
                 </div>
-            </c-card>
+            </a>
         {% empty %}
             <c-card class="border-dashed border-border/70 bg-card/80 p-10 text-center">
                 <p class="text-sm text-muted-foreground">Hamjamiyatlar hali yaratilmagan.</p>

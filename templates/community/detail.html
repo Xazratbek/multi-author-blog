@@ -4,73 +4,101 @@
 {% block page_heading %}Hamjamiyat{% endblock %}
 
 {% block content %}
-<section class="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[0.8fr_1.2fr]">
-    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5">
-        <div class="space-y-4">
-            <div>
-                <h2 class="font-display text-3xl font-bold tracking-tight">{{ community.name }}</h2>
-                <p class="mt-2 text-sm text-muted-foreground">{{ community.description|default:"Izoh yo'q." }}</p>
-            </div>
-            <div class="grid gap-3 sm:grid-cols-2">
-                <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">Egasi</p>
-                    <p class="mt-2 font-semibold">{{ community.owner.username }}</p>
-                </div>
-                <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-muted-foreground">A'zolar</p>
-                    <p class="mt-2 font-semibold">{{ community.members.count }}</p>
-                </div>
-            </div>
-
-            {% if request.user.is_authenticated %}
-                {% if community.owner == request.user %}
-                    <p class="text-sm text-muted-foreground">Siz bu hamjamiyat egasisiz.</p>
-                {% elif is_member %}
-                    <form action="{% url 'community_leave' community.slug %}" method="post" class="js-community-form">
-                        {% csrf_token %}
-                        <button type="submit" class="inline-flex h-11 items-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Chiqish</button>
-                    </form>
-                {% else %}
-                    <form action="{% url 'community_join' community.slug %}" method="post" class="js-community-form">
-                        {% csrf_token %}
-                        <button type="submit" class="inline-flex h-11 items-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Qo'shilish</button>
-                    </form>
-                {% endif %}
-            {% endif %}
+<section class="grid h-[calc(100vh-var(--header-height))] flex-1 grid-cols-1 md:grid-cols-[320px_1fr]">
+    <!-- Communities Sidebar -->
+    <aside class="hidden border-r border-border/70 md:flex md:flex-col">
+        <div class="border-b border-border/70 p-4">
+            <h2 class="font-display text-2xl font-bold tracking-tight">Hamjamiyatlar</h2>
         </div>
-    </c-card>
+        <nav class="flex flex-col gap-1 overflow-y-auto p-2">
+            {% for c in communities %}
+                <a href="{% url 'community_detail' c.slug %}" class="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors
+                    {% if c.pk == community.pk %} bg-primary/10 text-primary ring-1 ring-primary/40 {% else %} text-muted-foreground hover:bg-muted/50 hover:text-foreground {% endif %}">
+                    {% if c.community_profile %}
+                        <img src="{{ c.community_profile.url }}" alt="{{ c.name }}" class="h-10 w-10 rounded-full object-cover">
+                    {% else %}
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold">
+                            {{ c.name|first }}
+                        </div>
+                    {% endif %}
+                    <span class="truncate font-semibold">{{ c.name }}</span>
+                </a>
+            {% empty %}
+                <p class="p-3 text-sm text-muted-foreground">Hamjamiyatlar yo'q.</p>
+            {% endfor %}
+        </nav>
+        <div class="mt-auto border-t border-border/70 p-3">
+             <a href="{% url 'community_create' %}" class="inline-flex w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90">Yangi hamjamiyat</a>
+        </div>
+    </aside>
 
-    <div class="space-y-6">
-        <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5">
-            <div class="flex items-center justify-between gap-3">
-                <h3 class="font-display text-2xl font-bold">Xabarlar</h3>
-                <span class="text-sm text-muted-foreground">{{ community.messages.count }} ta</span>
+    <!-- Main Content Area -->
+    <main class="flex h-full max-h-[calc(100vh-var(--header-height))] flex-col bg-card">
+        <!-- Header -->
+        <header class="flex shrink-0 items-center gap-4 border-b border-border/70 p-4">
+            {% if community.community_profile %}
+                <img src="{{ community.community_profile.url }}" alt="{{ community.name }}" class="h-12 w-12 rounded-full object-cover">
+            {% else %}
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-xl font-bold">
+                    {{ community.name|first }}
+                </div>
+            {% endif %}
+            <div class="flex-1">
+                <h2 class="font-display text-xl font-bold tracking-tight">{{ community.name }}</h2>
+                <p class="text-sm text-muted-foreground">{{ community.members.count }} a'zo</p>
             </div>
+            <div class="ml-auto">
+                {% if request.user.is_authenticated %}
+                    {% if community.owner == request.user %}
+                        <span class="rounded-full border border-border/80 bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground">Ega</span>
+                    {% elif is_member %}
+                        <form action="{% url 'community_leave' community.slug %}" method="post" class="js-community-form">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-destructive/40 hover:text-destructive">Chiqish</button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'community_join' community.slug %}" method="post" class="js-community-form">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex h-10 items-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Qo'shilish</button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </header>
 
-            {% if request.user.is_authenticated and is_member %}
-                <form action="{% url 'community_message_send' community.slug %}" method="post" class="js-community-message-form mt-5 space-y-3">
+        <!-- Messages -->
+        <div id="message-list" 
+             class="flex-1 space-y-4 overflow-y-auto p-4"
+             hx-get="{% url 'community_message_list' community.slug %}?last_message_id={{ community.messages.last.id|default:0 }}"
+             hx-trigger="every 2s"
+             hx-swap="beforeend scroll:bottom">
+            {% include "community/partials/message_list.html" with messages=community.messages.all %}
+        </div>
+
+        <!-- Message Form -->
+        <div class="shrink-0 border-t border-border/70 bg-background/50 p-4">
+            {% if can_post_message %}
+                <form id="message-form"
+                      hx-post="{% url 'community_message_send' community.slug %}"
+                      hx-target="#message-list"
+                      hx-swap="beforeend scroll:bottom"
+                      class="space-y-3">
                     {% csrf_token %}
-                    <textarea name="message" placeholder="Hamjamiyatga xabar yozing..."></textarea>
+                    <textarea name="message" placeholder="Hamjamiyatga xabar yozing..." class="w-full"></textarea>
                     <button type="submit" class="inline-flex h-11 items-center rounded-full border border-border px-4 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Yuborish</button>
                 </form>
+                <script>
+                    document.getElementById('message-form').addEventListener('htmx:afterOnLoad', function(event) {
+                        // Clear the textarea after successful post
+                        if (event.detail.successful) {
+                            this.reset();
+                        }
+                    });
+                </script>
+            {% else %}
+                 <p class="text-center text-sm text-muted-foreground">Xabar yozish uchun hamjamiyatga a'zo bo'ling.</p>
             {% endif %}
-
-            <div class="mt-6 space-y-4">
-                {% for message in community.messages.all %}
-                    <div class="rounded-2xl border border-border/70 bg-background/65 p-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <p class="font-semibold">{{ message.author.username }}</p>
-                            <p class="text-xs text-muted-foreground">{{ message.created_at|date:"d M Y H:i" }}</p>
-                        </div>
-                        <p class="mt-3 text-sm leading-7 text-muted-foreground">{{ message.content }}</p>
-                    </div>
-                {% empty %}
-                    <div class="rounded-2xl border border-dashed border-border bg-background/60 px-5 py-4 text-sm text-muted-foreground">
-                        Hozircha xabarlar yo'q.
-                    </div>
-                {% endfor %}
-            </div>
-        </c-card>
-    </div>
+        </div>
+    </main>
 </section>
 {% endblock %}

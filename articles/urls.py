@@ -2,6 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    path('api/tags/', TagApiView.as_view(), name='tag_api'),
     path('',ArticleListView.as_view(),name='articles'),
     path('create/',ArticleCreateView.as_view(),name='article_create'),
     path('edit/<slug:slug>/',ArticleUpdateView.as_view(),name='article_update'),

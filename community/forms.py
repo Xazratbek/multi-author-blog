@@ -4,7 +4,7 @@ from .models import Community
 class CommunityForm(forms.ModelForm):
     class Meta:
         model = Community
-        fields = ['name', 'description']
+        fields = ['name', 'community_profile','description']
 
     def clean_name(self):
         name = self.cleaned_data.get('name')

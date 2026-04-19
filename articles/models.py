@@ -17,7 +17,13 @@ class Article(BaseModel):
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='articles')
     status = models.CharField(max_length=40,choices=ArticleStatusChoice.choices, default=ArticleStatusChoice.DRAFT,db_index=True)
-    categories = models.ManyToManyField(Category, related_name='posts')
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name='posts',
+        null=True,
+        blank=True,
+    )
     tags = models.ManyToManyField(Tag, related_name='posts')
     published_at = models.DateTimeField(null=True,blank=True)
 

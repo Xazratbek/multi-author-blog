@@ -1,13 +1,30 @@
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView
+from django.views import View
+from django.http import JsonResponse
 from articles.models import Article
 from .models import Category
 from django.db.models import Q
+
+class CategoryListApiView(View):
+    def get(self, request):
+        rows = [
+            {'id': c.pk, 'name': c.name, 'slug': c.slug}
+            for c in Category.objects.order_by('name')
+        ]
+        return JsonResponse(
+            {
+                'status': 200,
+                'message': 'Mavjud kategoriyalar',
+                'categories': rows,
+            }
+        )
+
 
 class CategoryListView(ListView):
     model = Category
     template_name = 'categories/list.html'
     context_object_name = 'categories'
+
 
 class CategoryDetailView(ListView):
     model = Article
@@ -18,15 +35,22 @@ class CategoryDetailView(ListView):
     paginate_by = 12
 
     def get_queryset(self):
-        queryset = Article.objects.filter(categories__slug=self.kwargs.get("slug"),status='published').order_by('-created_at')
+        queryset = Article.objects.filter(
+            category__slug=self.kwargs.get("slug"), status='published'
+        ).order_by('-created_at')
 
         q = self.request.GET.get('q','')
         if q:
-            queryset =  queryset.filter(Q(title__icontains=q) | Q(content__icontains=q) | Q(categories__name__icontains=q) | Q(tags__name__icontains=q))
+            queryset = queryset.filter(
+                Q(title__icontains=q)
+                | Q(content__icontains=q)
+                | Q(category__name__icontains=q)
+                | Q(tags__name__icontains=q)
+            )
 
         category = self.request.GET.get('category','')
         if category:
-            queryset = queryset.filter(categories__name=category)
+            queryset = queryset.filter(category__name=category)
 
         tag = self.request.GET.get('tag','')
         if tag:

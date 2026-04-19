@@ -1,0 +1,117 @@
+:root {
+  /* Bootstrap Bridge for Tom Select */
+  --bs-dropdown-bg: var(--card);
+  --bs-dropdown-border-color: var(--border);
+  --bs-dropdown-link-color: var(--foreground);
+  --bs-dropdown-link-hover-bg: var(--accent);
+  --bs-dropdown-link-hover-color: var(--accent-foreground);
+  --bs-dropdown-link-active-bg: var(--accent);
+  --bs-dropdown-link-active-color: var(--accent-foreground);
+  --bs-body-bg: var(--card); /* Fallback */
+}
+
+/**
+ * Tom Select — tema + dropdown input yonida (body emas), z-index.
+ */
+
+.article-form-ts {
+  position: relative;
+  z-index: 1;
+}
+
+.article-form-ts--categories .ts-wrapper.multi .ts-control,
+.article-form-ts--tags .ts-wrapper.multi .ts-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  row-gap: 0.4rem;
+  min-height: 2.75rem;
+}
+
+/* Bitta tanlov (kategoriya) */
+.article-form-ts--categories .ts-wrapper:not(.multi) .ts-control,
+.article-form-ts--categories .ts-wrapper .ts-control {
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+}
+
+.article-form-ts--categories .ts-wrapper.multi .ts-control input,
+.article-form-ts--tags .ts-wrapper.multi .ts-control input {
+  flex: 1 1 12rem !important;
+  min-width: min(100%, 12rem) !important;
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  opacity: 1 !important;
+  caret-color: var(--foreground);
+}
+
+.article-form-ts--categories .ts-wrapper.multi .ts-control > input::placeholder,
+.article-form-ts--tags .ts-wrapper.multi .ts-control > input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+.article-form-ts--categories .item,
+.article-form-ts--tags .item {
+  color: var(--foreground) !important;
+}
+
+.article-form-ts .ts-dropdown {
+  position: absolute !important;
+  left: 0 !important;
+  right: auto !important;
+  min-width: 100% !important;
+  max-width: min(100vw - 2rem, 32rem) !important;
+  z-index: 200 !important;
+  /* Shaffof fonni bartaraf etish */
+  background: var(--card) !important;
+  opacity: 1 !important;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.15),
+    0 10px 25px -5px rgb(0 0 0 / 0.25);
+  isolation: isolate;
+}
+
+.article-form-ts .ts-dropdown .ts-dropdown-content {
+  background: var(--card) !important;
+  max-height: min(50vh, 16rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Kategoriya (single): tanlangan qiymat matni dark modeda ko‘rinsin */
+.article-form-ts--categories .ts-wrapper.single .ts-control,
+.article-form-ts--categories .ts-wrapper.single .ts-control .item {
+  color: var(--foreground) !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+}
+
+.article-form-ts--categories .ts-dropdown .option,
+.article-form-ts--tags .ts-dropdown .option {
+  color: var(--foreground);
+}
+
+.article-form-ts--categories .ts-dropdown .option.active,
+.article-form-ts--tags .ts-dropdown .option.active {
+  color: var(--accent-foreground);
+}
+
+/* Give the category dropdown a higher z-index than the tags dropdown when open */
+.article-form-ts--categories .ts-wrapper.ts-dropdown-open ~ .ts-dropdown {
+  z-index: 202 !important;
+}
+
+.article-form-ts--tags .ts-wrapper.ts-dropdown-open ~ .ts-dropdown {
+  z-index: 201 !important;
+}

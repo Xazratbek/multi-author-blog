@@ -133,6 +133,33 @@ CKEDITOR_5_CONFIGS = {
         'toolbar': ['heading', '|', 'bold', 'italic', 'link',
                     'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
     },
+    # Maqola yozish: bir qator, konteynerdan chiqmasin
+    'article': {
+        'toolbar': [
+            'undo', 'redo', '|',
+            'heading', '|',
+            'bold', 'italic', 'link', '|',
+            'bulletedList', 'numberedList', '|',
+            'blockQuote', '|',
+            'imageUpload', '|',
+            'sourceEditing',
+        ],
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph', 'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1', 'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2', 'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3', 'title': 'Heading 3', 'class': 'ck-heading_heading3'},
+            ]
+        },
+        'image': {
+            'toolbar': [
+                'imageTextAlternative', '|',
+                'imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|',
+                'linkImage',
+            ],
+        },
+    },
     'extends': {
         'blockToolbar': [
             'paragraph', 'heading1', 'heading2', 'heading3',
@@ -155,10 +182,7 @@ CKEDITOR_5_CONFIGS = {
             ]
         },
         'mediaEmbed': {
-            'previewsInData': True,
-            'providers': [
-                'youtube', 'vimeo', 'instagram', 'twitter', 'googleMaps', 'flickr', 'dailymotion', 'spotify', 'codepen', 'soundcloud'
-            ]
+            'previewsInData': True
         },
         'table': {
             'contentToolbar': ['tableColumn', 'tableRow', 'mergeTableCells',

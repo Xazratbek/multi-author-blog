@@ -12,29 +12,44 @@
         </div>
         <form method="post" class="grid gap-5 md:grid-cols-2">
             {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive md:col-span-2">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div>
                 <label for="{{ form.username.id_for_label }}">Login</label>
                 {{ form.username }}
+                {% if form.username.errors %}<p class="mt-2 text-sm text-destructive">{{ form.username.errors|join:", " }}</p>{% endif %}
             </div>
             <div>
                 <label for="{{ form.email.id_for_label }}">Email</label>
                 {{ form.email }}
+                {% if form.email.errors %}<p class="mt-2 text-sm text-destructive">{{ form.email.errors|join:", " }}</p>{% endif %}
             </div>
             <div>
                 <label for="{{ form.first_name.id_for_label }}">Ism</label>
                 {{ form.first_name }}
+                {% if form.first_name.errors %}<p class="mt-2 text-sm text-destructive">{{ form.first_name.errors|join:", " }}</p>{% endif %}
             </div>
             <div>
                 <label for="{{ form.last_name.id_for_label }}">Familiya</label>
                 {{ form.last_name }}
+                {% if form.last_name.errors %}<p class="mt-2 text-sm text-destructive">{{ form.last_name.errors|join:", " }}</p>{% endif %}
             </div>
             <div>
                 <label for="{{ form.password1.id_for_label }}">Parol</label>
                 {{ form.password1 }}
+                {% if form.password1.errors %}<p class="mt-2 text-sm text-destructive">{{ form.password1.errors|join:", " }}</p>{% endif %}
             </div>
             <div>
                 <label for="{{ form.password2.id_for_label }}">Parolni tasdiqlang</label>
                 {{ form.password2 }}
+                {% if form.password2.errors %}<p class="mt-2 text-sm text-destructive">{{ form.password2.errors|join:", " }}</p>{% endif %}
             </div>
             <div class="md:col-span-2">
                 <c-button type="submit" class="w-full rounded-xl">Akkaunt yaratish</c-button>

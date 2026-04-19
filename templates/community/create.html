@@ -11,9 +11,33 @@
             <p class="mt-2 text-sm text-muted-foreground">Nom va qisqa tavsif kiriting.</p>
         </div>
 
-        <form method="post" class="space-y-5">
+        <form method="post" enctype="multipart/form-data" class="space-y-5">
             {% csrf_token %}
-            {{ form.as_p }}
+            
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    {{ form.non_field_errors|join:", " }}
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.name.id_for_label }}">Hamjamiyat nomi</label>
+                {{ form.name }}
+                {% if form.name.errors %}<p class="mt-2 text-sm text-destructive">{{ form.name.errors|join:", " }}</p>{% endif %}
+            </div>
+            
+            <div>
+                <label for="{{ form.description.id_for_label }}">Tavsif</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="mt-2 text-sm text-destructive">{{ form.description.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.community_profile.id_for_label }}">Hamjamiyat rasmi</label>
+                {{ form.community_profile }}
+                {% if form.community_profile.errors %}<p class="mt-2 text-sm text-destructive">{{ form.community_profile.errors|join:", " }}</p>{% endif %}
+            </div>
+
             <div class="flex flex-wrap gap-3 pt-2">
                 <c-button type="submit" class="rounded-xl px-6">Saqlash</c-button>
                 <a href="{% url 'communities' %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2.5 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Bekor qilish</a>

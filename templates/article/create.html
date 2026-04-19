@@ -1,12 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Yangi maqola{% endblock %}
 {% block page_heading %}Yangi maqola{% endblock %}
-{% block extra_head %}{{ form.media }}{% endblock %}
+{% block extra_head %}
+    {{ form.media }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/article-tomselect-overrides.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js" crossorigin="anonymous"></script>
+{% endblock %}
 
 {% block content %}
 <section class="mx-auto w-full max-w-5xl">
-    <c-card class="border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5 md:p-8">
+    <c-card class="overflow-visible border-border/70 bg-card/90 p-6 shadow-xl shadow-black/5 md:p-8">
         <div class="mb-6">
             <h2 class="font-display text-3xl font-bold tracking-tight">Yangi maqola</h2>
             <p class="mt-2 text-sm leading-7 text-muted-foreground">Sarlavha va matnni kiriting. Maqola dastlab qoralama holatda saqlanadi.</p>
@@ -28,8 +34,29 @@
 
             <div>
                 <label for="{{ form.content.id_for_label }}">Matn</label>
-                {{ form.content }}
+                <div class="article-ckeditor-wrap max-w-full overflow-hidden rounded-xl border border-border">
+                    {{ form.content }}
+                </div>
                 {% if form.content.errors %}<p class="mt-2 text-sm text-destructive">{{ form.content.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="text-sm font-medium text-foreground/90">{{ form.category.label }}</label>
+                <div class="article-form-ts article-form-ts--categories mt-2">
+                    {{ form.category }}
+                </div>
+                <p id="category-select-empty" class="mt-2 hidden rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                    Hozircha kategoriya yo‘q.
+                </p>
+                {% if form.category.errors %}<p class="mt-2 text-sm text-destructive">{{ form.category.errors|join:", " }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.tags.id_for_label }}" class="text-sm font-medium text-foreground/90">{{ form.tags.label }}</label>
+                <div class="article-form-ts article-form-ts--tags mt-2">
+                    {{ form.tags }}
+                </div>
+                {% if form.tags.errors %}<p class="mt-2 text-sm text-destructive">{{ form.tags.errors|join:", " }}</p>{% endif %}
             </div>
 
             <div class="flex flex-wrap gap-3 pt-2">
@@ -39,4 +66,112 @@
         </form>
     </c-card>
 </section>
+
+<script>
+(function () {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    var categoryInitialId = {{ category_initial_id_json|safe }};
+
+    function initCategoriesTs() {
+        var el = document.getElementById('id_category');
+        if (!el || typeof TomSelect === 'undefined') return;
+        if (el.tomselect) return;
+
+        new TomSelect(el, {
+            create: false,
+            persist: false,
+            maxItems: 1,
+            placeholder: 'Kategoriya tanlang…',
+            hideSelected: false,
+            openOnFocus: true,
+        });
+
+        if (categoryInitialId !== null && categoryInitialId !== undefined && String(categoryInitialId) !== '') {
+            if (el.tomselect) {
+                el.tomselect.setValue(String(categoryInitialId));
+            }
+        }
+    }
+
+    function initTagsTs() {
+        var el = document.getElementById('id_tags');
+        if (!el || typeof TomSelect === 'undefined') return;
+        if (el.tomselect) return;
+
+        new TomSelect(el, {
+            plugins: ['remove_button'],
+            valueField: 'id',
+            labelField: 'text',
+            searchField: 'text',
+            maxItems: 10,
+            placeholder: 'Teglarni qidiring yoki yozing…',
+            persist: false,
+            hideSelected: true,
+            openOnFocus: true,
+            create: function(input, callback) {
+                this.lock();
+                fetch("{% url 'tag_api' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ name: input })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.id) {
+                        callback(data);
+                    } else {
+                        callback();
+                    }
+                    this.unlock();
+                }).catch(() => {
+                    callback();
+                    this.unlock();
+                });
+            },
+            load: function(query, callback) {
+                if (!query.length) return callback();
+                var url = "{% url 'tag_api' %}" + '?q=' + encodeURIComponent(query);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(json => {
+                        callback(json);
+                    }).catch(()=>{
+                        callback();
+                    });
+            },
+            render: {
+                option_create: function(data, escape) {
+                    return '<div class="create">"<strong>' + escape(data.input) + '</strong>" yaratish...</div>';
+                },
+                no_results:function(data,escape){
+					return '<div class="no-results">Hech narsa topilmadi.</div>';
+				},
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initCategoriesTs();
+        initTagsTs();
+    });
+})();
+</script>
 {% endblock %}

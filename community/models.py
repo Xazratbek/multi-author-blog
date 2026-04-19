@@ -10,6 +10,7 @@ class CommunityRoleChoice(models.TextChoices):
 class Community(BaseModel):
     name = models.CharField(max_length=150,unique=True, db_index=True)
     slug = models.SlugField(unique=True, db_index=True)
+    community_profile = models.ImageField(upload_to='community/%Y/%m/%d/',null=True,blank=True)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,related_name='communities',db_index=True)
     description = models.TextField(max_length=500)
 

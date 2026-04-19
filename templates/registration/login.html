@@ -13,13 +13,28 @@
         </div>
         <form method="post" class="space-y-5">
             {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div>
-                <label for="{{ form.username.id_for_label }}">Login</label>
+                <label for="{{ form.username.id_for_label }}">Username</label>
                 {{ form.username }}
+                {% if form.username.errors %}
+                    <p class="mt-2 text-sm text-destructive">{{ form.username.errors|join:", " }}</p>
+                {% endif %}
             </div>
             <div>
                 <label for="{{ form.password.id_for_label }}">Parol</label>
                 {{ form.password }}
+                {% if form.password.errors %}
+                    <p class="mt-2 text-sm text-destructive">{{ form.password.errors|join:", " }}</p>
+                {% endif %}
             </div>
             <c-button type="submit" class="w-full rounded-xl">Kirish</c-button>
         </form>

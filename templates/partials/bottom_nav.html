@@ -1,0 +1,105 @@
+{# Mobil: faqat lg dan kichik ekranlar — desktopda sidebar ishlatiladi #}
+{% url 'article_create' as url_article_create %}
+<nav
+    class="fixed bottom-0 left-0 right-0 z-40 border-t border-border/80 bg-background/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl dark:shadow-[0_-4px_24px_rgba(0,0,0,0.25)] lg:hidden"
+    aria-label="Asosiy navigatsiya"
+>
+    <div class="mx-auto flex max-w-7xl items-stretch justify-between gap-0.5 px-1">
+        <a
+            href="{% url 'articles' %}"
+            class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'articles' or request.resolver_match.url_name == 'article_detail' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+        >
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'articles' or request.resolver_match.url_name == 'article_detail' %}bg-primary/15 text-primary{% else %}bg-muted/60 text-foreground/80{% endif %}">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22V4.5A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </span>
+            <span class="max-w-[4.25rem] truncate text-center">Maqolalar</span>
+        </a>
+
+        {% if request.user.is_authenticated %}
+            <a
+                href="{% url 'article_create' %}"
+                class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'article_create' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'article_create' %}bg-primary/15 text-primary{% else %}bg-muted/60 text-foreground/80{% endif %}">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                </span>
+                <span class="max-w-[4.25rem] truncate text-center">Yozish</span>
+            </a>
+        {% else %}
+            <a
+                href="{% url 'login' %}?next={{ url_article_create|urlencode }}"
+                class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight text-muted-foreground transition hover:text-foreground"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted/60 text-foreground/80">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                </span>
+                <span class="max-w-[4.25rem] truncate text-center">Yozish</span>
+            </a>
+        {% endif %}
+
+        <a
+            href="{% url 'author_profiles' %}"
+            class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'author_profiles' or request.resolver_match.url_name == 'see_profile' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+        >
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'author_profiles' or request.resolver_match.url_name == 'see_profile' %}bg-primary/15 text-primary{% else %}bg-muted/60 text-foreground/80{% endif %}">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <path d="M20 8v6M23 11h-6"></path>
+                </svg>
+            </span>
+            <span class="max-w-[4.25rem] truncate text-center">Mualliflar</span>
+        </a>
+
+        <a
+            href="{% url 'communities' %}"
+            class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'communities' or request.resolver_match.url_name == 'community_detail' or request.resolver_match.url_name == 'community_create' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+        >
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'communities' or request.resolver_match.url_name == 'community_detail' or request.resolver_match.url_name == 'community_create' %}bg-primary/15 text-primary{% else %}bg-muted/60 text-foreground/80{% endif %}">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <path d="M20 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"></path>
+                </svg>
+            </span>
+            <span class="max-w-[4.25rem] truncate text-center">Hamjamiyat</span>
+        </a>
+
+        {% if request.user.is_authenticated %}
+            <a
+                href="{% url 'my_profile' %}"
+                class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'my_profile' or request.resolver_match.url_name == 'update_profile' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl ring-2 ring-transparent {% if request.resolver_match.url_name == 'my_profile' or request.resolver_match.url_name == 'update_profile' %}ring-primary/40{% endif %}">
+                    {% if request.user.profile.avatar %}
+                        <img src="{{ request.user.profile.avatar.url }}" alt="" class="h-full w-full object-cover" width="40" height="40" />
+                    {% else %}
+                        <span class="flex h-full w-full items-center justify-center bg-primary/15 text-xs font-bold text-primary">{{ request.user.username|first|upper }}</span>
+                    {% endif %}
+                </span>
+                <span class="max-w-[4.25rem] truncate text-center">Profil</span>
+            </a>
+        {% else %}
+            <a
+                href="{% url 'login' %}"
+                class="flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold leading-tight transition {% if request.resolver_match.url_name == 'login' %}text-primary{% else %}text-muted-foreground hover:text-foreground{% endif %}"
+            >
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl {% if request.resolver_match.url_name == 'login' %}bg-primary/15 text-primary{% else %}bg-muted/60 text-foreground/80{% endif %}">
+                    <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <path d="M10 17l5-5-5-5"></path>
+                        <path d="M15 12H3"></path>
+                    </svg>
+                </span>
+                <span class="max-w-[4.25rem] truncate text-center">Kirish</span>
+            </a>
+        {% endif %}
+    </div>
+</nav>

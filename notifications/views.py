@@ -4,6 +4,7 @@ from .models import Notification
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from articles.models import Article
+from comments.models import Comment
 
 class NotificationListView(LoginRequiredMixin,View):
     def get(self, request):
@@ -17,7 +18,12 @@ class NotificationListView(LoginRequiredMixin,View):
             if notification.content_type == 'article' and notification.object_id:
                 article = Article.objects.filter(id=notification.object_id).only('slug').first()
                 if article:
-                    url = f"/articles/{article.slug}/"
+                    url = f"{article.slug}/"
+            elif notification.content_type == 'comment' and notification.object_id:
+                comment = Comment.objects.select_related('article').filter(id=notification.object_id).first()
+                if comment and comment.article:
+                    url = f"{comment.article.slug}/#comment-{comment.id}"
+
             data.append(
                 {
                     "id": notification.id,
@@ -31,7 +37,6 @@ class NotificationListView(LoginRequiredMixin,View):
             )
 
         return JsonResponse({"status": 200,'message':'O\'qilmagan bildirishnomalar','data': data, 'count': len(data)})
-
 
 class NotificationReadView(LoginRequiredMixin, View):
     def get(self, request,id):

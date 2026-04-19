@@ -51,11 +51,11 @@
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <div class="flex flex-wrap gap-2">
-                                {% for category in article.categories.all|slice:":2" %}
-                                    <c-badge class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{{ category.name }}</c-badge>
-                                {% empty %}
+                                {% if article.category %}
+                                    <c-badge class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{{ article.category.name }}</c-badge>
+                                {% else %}
                                     <c-badge class="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">Umumiy</c-badge>
-                                {% endfor %}
+                                {% endif %}
                             </div>
                             <h3 class="mt-4 font-display text-2xl font-bold leading-tight tracking-tight">
                                 <a href="{% url 'article_detail' article.slug %}" class="group-hover:text-primary">{{ article.title }}</a>
@@ -104,10 +104,10 @@
                 <p class="text-sm text-muted-foreground">Sahifa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</p>
                 <div class="flex gap-3">
                     {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Oldingi</a>
+                        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="inline-flex items-center rounded-xl border border-border px-4 py-2 text-sm font-semibold transition hover:border-primary/40 hover:text-primary">Oldingi</a>
                     {% endif %}
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}" class="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Keyingi</a>
+                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">Keyingi</a>
                     {% endif %}
                 </div>
             </div>

@@ -1,5 +1,4 @@
 import json
-
 from django import forms
 from django.forms import ModelForm
 from django_ckeditor_5.widgets import CKEditor5Widget

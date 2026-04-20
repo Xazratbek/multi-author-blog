@@ -8,7 +8,6 @@ class TagInline(admin.TabularInline):
     model = Article.tags.through
     extra = 1
 
-
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     form = ArticleAdminForm

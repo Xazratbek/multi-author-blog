@@ -54,8 +54,7 @@ class ArticleView(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        view_count = self.__class__.objects.filter(article=self.article).count()
-        return f"Article: {self.article.title} | Views: {view_count}"
+        return f"Article: {self.article.title} | Views: {self.__class__.objects.filter(article=self.article).count()}"
 
     class Meta:
         db_table = 'article_views'

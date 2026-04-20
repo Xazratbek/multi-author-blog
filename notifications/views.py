@@ -19,6 +19,7 @@ class NotificationListView(LoginRequiredMixin,View):
                 article = Article.objects.filter(id=notification.object_id).only('slug').first()
                 if article:
                     url = f"{article.slug}/"
+
             elif notification.content_type == 'comment' and notification.object_id:
                 comment = Comment.objects.select_related('article').filter(id=notification.object_id).first()
                 if comment and comment.article:

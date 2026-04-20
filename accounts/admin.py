@@ -21,10 +21,6 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'age', 'telegram_url')
     search_fields = ('user__username', 'bio')
 
-from django.contrib import admin
-from .models import AuthorFollow
-
-
 @admin.register(AuthorFollow)
 class AuthorFollowAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'author', 'created_at')

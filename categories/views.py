@@ -7,7 +7,7 @@ from django.db.models import Q
 
 class CategoryListApiView(View):
     def get(self, request):
-        rows = [
+        data = [
             {'id': c.pk, 'name': c.name, 'slug': c.slug}
             for c in Category.objects.order_by('name')
         ]
@@ -15,7 +15,7 @@ class CategoryListApiView(View):
             {
                 'status': 200,
                 'message': 'Mavjud kategoriyalar',
-                'categories': rows,
+                'categories': data,
             }
         )
 

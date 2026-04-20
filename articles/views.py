@@ -11,15 +11,11 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.db.models import Q
-from notifications.models import Notification
 from notifications.tasks import enqueue_new_post_notifications
-from accounts.models import CustomUser, AuthorFollow
+from accounts.models import AuthorFollow
 from categories.models import Category, Tag
 
-
 class TagApiView(LoginRequiredMixin, View):
-    http_method_names = ['get', 'post']
-
     def get(self, request, *args, **kwargs):
         query = request.GET.get('q', '')
         tags_qs = Tag.objects.all()

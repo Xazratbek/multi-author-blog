@@ -11,17 +11,16 @@ SECRET_KEY = 'django-insecure-5yvc2*2z3t0__alcopo#7gc+%6@u6x__ya2fvz8w+#rp6gh(v(
 DEBUG = True
 
 ALLOWED_HOSTS = []
+INTERNAL_IPS = ["127.0.0.1"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    "https://7d05-213-230-91-82.ngrok-free.app"
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
-    "https://7d05-213-230-91-82.ngrok-free.app",
     "https://*.ngrok-free.app",
     "https://*.ngrok.io",
 ]
@@ -50,9 +49,11 @@ INSTALLED_APPS = [
     'crispy_bootstrap5',
     "corsheaders",
     'django_ckeditor_5',
+    # 'debug_toolbar'
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
